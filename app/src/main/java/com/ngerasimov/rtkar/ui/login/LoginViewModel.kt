@@ -23,6 +23,13 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     suspend fun getAuthToken(): String? {
         return storageManager.authToken.first()
     }
+    
+    /**
+     * Get the list of entities
+     */
+    suspend fun getEntities(): List<com.ngerasimov.rtkar.data.Entity> {
+        return storageManager.entities.first()
+    }
 
     /**
      * Save the authentication token from the Authorization header

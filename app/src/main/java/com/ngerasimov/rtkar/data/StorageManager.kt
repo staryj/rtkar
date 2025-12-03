@@ -122,7 +122,7 @@ class StorageManager(private val context: Context) {
      * Get entities synchronously (for one-time reads)
      * Note: This should be used sparingly, prefer Flow-based access
      */
-    private suspend fun getEntitiesSync(): List<Entity> {
+    suspend fun getEntitiesSync(): List<Entity> {
         val preferences = context.dataStore.data.first()
         val entitiesJson = preferences[ENTITIES_KEY]
         return if (entitiesJson.isNullOrEmpty()) {
@@ -134,5 +134,31 @@ class StorageManager(private val context: Context) {
                 emptyList()
             }
         }
+    }
+    
+    /**
+     * Check if a device is selected (exists in entities)
+     */
+    suspend fun isDeviceSelected(deviceId: String, type: EntityType): Boolean {
+        val entities = getEntitiesSync()
+        return entities.any { it.deviceId == deviceId && it.type == type }
+    }
+    
+    /**
+     * Toggle device selection - add if not selected, remove if selected
+     */
+    suspend fun toggleDeviceSelection(deviceId: String, title: String, type: EntityType) {
+        val entities = getEntitiesSync().toMutableList()
+        val existingIndex = entities.indexOfFirst { it.deviceId == deviceId && it.type == type }
+        
+        if (existingIndex >= 0) {
+            // Remove if exists
+            entities.removeAt(existingIndex)
+        } else {
+            // Add if doesn't exist
+            entities.add(Entity(type = type, title = title, deviceId = deviceId))
+        }
+        
+        saveEntities(entities)
     }
 }

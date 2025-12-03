@@ -25,5 +25,5 @@ data class Entity(
     @Serializable(with = EntityTypeSerializer::class)
     val type: EntityType,
     val title: String,
-    val url: String
+    val deviceId: String
 )

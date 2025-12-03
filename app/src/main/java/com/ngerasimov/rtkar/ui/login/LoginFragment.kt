@@ -24,6 +24,8 @@ class LoginFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: LoginViewModel by viewModels()
     private var isTokenCaptured = false
+    private var navigationRetryCount = 0
+    private val maxNavigationRetries = 3
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreateView(
@@ -35,20 +37,71 @@ class LoginFragment : Fragment() {
         return binding.root
     }
 
+    private var hasCheckedAuth = false
+    
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        // Check if user is already authorized
-        lifecycleScope.launch {
-            val authToken = viewModel.getAuthToken()
-            if (!authToken.isNullOrEmpty()) {
-                // User is already authorized, navigate to Settings
-                // Add a small delay to ensure fragment is fully attached
-                delay(200)
-                navigateToSettings()
-            } else {
-                // User not authorized, show login WebView
-                setupWebView()
+        // Setup WebView if needed (will be checked in onResume)
+        if (!hasCheckedAuth) {
+            lifecycleScope.launch {
+                val authToken = viewModel.getAuthToken()
+                if (authToken.isNullOrEmpty()) {
+                    // User not authorized, show login WebView
+                    setupWebView()
+                }
+            }
+        }
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        
+        // Check auth and navigate in onResume when NavController is definitely ready
+        if (!hasCheckedAuth) {
+            hasCheckedAuth = true
+            lifecycleScope.launch {
+                val authToken = viewModel.getAuthToken()
+                if (!authToken.isNullOrEmpty()) {
+                    // User is already authorized, check if entities exist
+                    val entities = viewModel.getEntities()
+                    // Wait for fragment to be fully resumed and NavController graph to be initialized
+                    delay(1000)
+                    if (isAdded && view != null && lifecycle.currentState.isAtLeast(androidx.lifecycle.Lifecycle.State.RESUMED)) {
+                        if (entities.isNotEmpty()) {
+                            // Entities exist, navigate to Control
+                            // Wait additional time and verify graph is ready
+                            view?.postDelayed({
+                                if (isAdded && isResumed) {
+                                    try {
+                                        val navController = findNavController()
+                                        val graph = navController.graph
+                                        // Verify graph has the destination before navigating
+                                        if (graph.findNode(com.ngerasimov.rtkar.R.id.nav_control) != null) {
+                                            navigateToControl()
+                                        } else {
+                                            Log.w("LoginFragment", "Control node still not in graph, will retry")
+                                            view?.postDelayed({
+                                                if (isAdded && isResumed) {
+                                                    navigateToControl()
+                                                }
+                                            }, 500)
+                                        }
+                                    } catch (e: Exception) {
+                                        Log.e("LoginFragment", "Error checking graph", e)
+                                    }
+                                }
+                            }, 300)
+                        } else {
+                            // No entities, navigate to Settings
+                            view?.postDelayed({
+                                if (isAdded && isResumed) {
+                                    navigateToSettings()
+                                }
+                            }, 300)
+                        }
+                    }
+                }
             }
         }
     }
@@ -84,7 +137,13 @@ class LoginFragment : Fragment() {
                                     Log.d("LoginFragment", "Auth token captured from request: $authHeader")
                                     // Add a small delay to ensure navigation graph is ready
                                     delay(100)
-                                    navigateToSettings()
+                                    // Check if entities exist after login
+                                    val entities = viewModel.getEntities()
+                                    if (entities.isNotEmpty()) {
+                                        navigateToControl()
+                                    } else {
+                                        navigateToSettings()
+                                    }
                                 }
                             }
                         }
@@ -188,11 +247,80 @@ class LoginFragment : Fragment() {
     }
 
     private fun navigateToSettings() {
-        if (isAdded && view != null) {
-            try {
-                findNavController().navigate(com.ngerasimov.rtkar.R.id.nav_settings)
-            } catch (e: Exception) {
-                Log.e("LoginFragment", "Failed to navigate to settings", e)
+        if (!isAdded || view == null) {
+            Log.w("LoginFragment", "Fragment not attached, cannot navigate")
+            return
+        }
+        
+        try {
+            val navController = findNavController()
+            // Don't use popUpTo with inclusive=true on start destination
+            // Just navigate normally
+            navController.navigate(com.ngerasimov.rtkar.R.id.nav_settings)
+            Log.d("LoginFragment", "Successfully navigated to Settings")
+            navigationRetryCount = 0 // Reset on success
+        } catch (e: Exception) {
+            Log.e("LoginFragment", "Failed to navigate to settings: ${e.message}", e)
+            navigationRetryCount++
+            if (navigationRetryCount < maxNavigationRetries) {
+                // Retry after a delay
+                view?.postDelayed({
+                    if (isAdded) {
+                        navigateToSettings()
+                    }
+                }, 300)
+            } else {
+                Log.e("LoginFragment", "Max retries reached, navigation failed")
+                navigationRetryCount = 0
+            }
+        }
+    }
+    
+    private fun navigateToControl() {
+        if (!isAdded || view == null) {
+            Log.w("LoginFragment", "Fragment not attached, cannot navigate")
+            return
+        }
+        
+        if (navigationRetryCount >= maxNavigationRetries) {
+            Log.e("LoginFragment", "Max navigation retries reached, giving up")
+            navigationRetryCount = 0
+            return
+        }
+        
+        try {
+            val navController = findNavController()
+            // Check if graph is ready and has the destination
+            val graph = navController.graph
+            val controlNode = graph.findNode(com.ngerasimov.rtkar.R.id.nav_control)
+            
+            if (controlNode == null) {
+                Log.w("LoginFragment", "Control destination not found in navigation graph, retrying... (attempt ${navigationRetryCount + 1})")
+                navigationRetryCount++
+                // Retry after a short delay
+                view?.postDelayed({
+                    if (isAdded) {
+                        navigateToControl()
+                    }
+                }, 200)
+                return
+            }
+            
+            // Navigate without popUpTo - just simple navigation
+            navController.navigate(com.ngerasimov.rtkar.R.id.nav_control)
+            Log.d("LoginFragment", "Successfully navigated to Control")
+            navigationRetryCount = 0 // Reset on success
+        } catch (e: Exception) {
+            Log.e("LoginFragment", "Failed to navigate to control: ${e.message}", e)
+            navigationRetryCount++
+            if (navigationRetryCount < maxNavigationRetries) {
+                // Retry after a longer delay
+                view?.postDelayed({
+                    navigateToControl()
+                }, 300)
+            } else {
+                Log.e("LoginFragment", "Max retries reached, navigation failed")
+                navigationRetryCount = 0
             }
         }
     }
@@ -209,7 +337,13 @@ class LoginFragment : Fragment() {
                         Log.d("LoginFragment", "Auth token captured from JS: $token")
                         // Add a small delay to ensure navigation graph is ready
                         delay(100)
-                        navigateToSettings()
+                        // Check if entities exist after login
+                        val entities = viewModel.getEntities()
+                        if (entities.isNotEmpty()) {
+                            navigateToControl()
+                        } else {
+                            navigateToSettings()
+                        }
                     }
                 }
             }

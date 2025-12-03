@@ -76,7 +76,7 @@ class RtkApiWrapper(private val context: Context) {
             
             // Fetch from API
             val response = apiService.getBarrierDevices(
-                authorization = "Bearer $authToken",
+                authorization = authToken,
                 accept = "application/json",
                 referer = "https://key.rt.ru/"
             )
@@ -119,7 +119,7 @@ class RtkApiWrapper(private val context: Context) {
             
             // Fetch from API
             val response = apiService.getIntercomDevices(
-                authorization = "Bearer $authToken",
+                authorization = authToken,
                 accept = "application/json",
                 referer = "https://key.rt.ru/"
             )

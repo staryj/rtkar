@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity() {
         val navController = navHostFragment.navController
 
         // Setup navigation based on auth status
-        // Don't navigate on startup - let LoginFragment handle it if user is already authorized
+        // Check if entities exist and set start destination accordingly
         lifecycleScope.launch {
             val authToken = storageManager.authToken.first()
             val isAuthorized = !authToken.isNullOrEmpty()
@@ -54,6 +54,9 @@ class MainActivity : AppCompatActivity() {
             }
             
             setupNavigation(isAuthorized)
+            
+            // Note: Navigation to Control/Settings is handled by LoginFragment
+            // after it's fully created and the graph is ready
         }
 
         // Observe auth token changes to update UI
