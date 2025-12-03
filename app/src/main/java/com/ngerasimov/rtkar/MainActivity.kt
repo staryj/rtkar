@@ -1,12 +1,15 @@
 package com.ngerasimov.rtkar
 
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import com.google.android.material.navigation.NavigationView
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -37,29 +40,20 @@ class MainActivity : AppCompatActivity() {
             (supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main) as NavHostFragment?)!!
         val navController = navHostFragment.navController
 
-        // Check auth status and set start destination
+        // Setup navigation based on auth status
+        // Don't navigate on startup - let LoginFragment handle it if user is already authorized
         lifecycleScope.launch {
             val authToken = storageManager.authToken.first()
             val isAuthorized = !authToken.isNullOrEmpty()
-
-            // Setup navigation based on auth status
-            setupNavigation(isAuthorized)
-
-            // Navigate to correct destination based on auth status
-            val currentDestination = navController.currentDestination?.id
-            if (isAuthorized && (currentDestination == null || currentDestination == R.id.nav_login)) {
-                // If authorized and on login or no destination, go to control
-                navController.navigate(R.id.nav_control) {
-                    // Clear back stack so user can't go back to login
-                    popUpTo(R.id.nav_login) { inclusive = true }
-                }
-            } else if (!isAuthorized && currentDestination != null && currentDestination != R.id.nav_login) {
-                // If not authorized and not on login, go to login
-                navController.navigate(R.id.nav_login) {
-                    // Clear back stack
-                    popUpTo(R.id.nav_control) { inclusive = true }
-                }
+            
+            // Log auth_token on application startup
+            if (authToken != null) {
+                Log.d("MainActivity", "Auth token on startup: $authToken")
+            } else {
+                Log.d("MainActivity", "No auth token on startup")
             }
+            
+            setupNavigation(isAuthorized)
         }
 
         // Observe auth token changes to update UI
@@ -74,15 +68,16 @@ class MainActivity : AppCompatActivity() {
                 val currentDestination = navController.currentDestination?.id
                 if (!isAuthorized && currentDestination != null && currentDestination != R.id.nav_login) {
                     // User logged out or token cleared - redirect to login
-                    navController.navigate(R.id.nav_login) {
-                        popUpTo(R.id.nav_control) { inclusive = true }
-                    }
-                } else if (isAuthorized && currentDestination == R.id.nav_login) {
-                    // User just logged in - redirect to control
-                    navController.navigate(R.id.nav_control) {
-                        popUpTo(R.id.nav_login) { inclusive = true }
+                    try {
+                        navController.navigate(R.id.nav_login) {
+                            popUpTo(R.id.nav_control) { inclusive = true }
+                        }
+                    } catch (e: Exception) {
+                        // Navigation might fail if graph is not ready, ignore
                     }
                 }
+                // Note: We don't auto-navigate when user logs in from LoginFragment
+                // LoginFragment will handle navigation to Settings after successful login
             }
         }
     }
