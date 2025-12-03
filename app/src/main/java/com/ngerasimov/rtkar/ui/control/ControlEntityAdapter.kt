@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -14,11 +15,18 @@ import com.ngerasimov.rtkar.data.Entity
 
 class ControlEntityAdapter(
     private val onItemClick: (Entity) -> Unit,
-    private var isLoading: (String) -> Boolean
+    private var isLoading: (String) -> Boolean,
+    private val onDeleteClick: (Entity) -> Unit,
+    private var isEditingMode: Boolean = false
 ) : ListAdapter<Entity, ControlEntityAdapter.EntityViewHolder>(EntityDiffCallback()) {
     
     fun updateLoadingChecker(checker: (String) -> Boolean) {
         isLoading = checker
+        notifyDataSetChanged()
+    }
+    
+    fun updateEditingMode(editing: Boolean) {
+        isEditingMode = editing
         notifyDataSetChanged()
     }
 
@@ -55,6 +63,7 @@ class ControlEntityAdapter(
     inner class EntityViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val cardView: MaterialCardView = itemView.findViewById(R.id.device_card)
         private val titleText: TextView = itemView.findViewById(R.id.device_title)
+        private val deleteButton: ImageButton = itemView.findViewById(R.id.delete_button)
 
         fun bind(entity: Entity) {
             titleText.text = entity.title
@@ -62,7 +71,29 @@ class ControlEntityAdapter(
             // Check if this entity is currently loading
             val isCurrentlyLoading = isLoading(entity.deviceId)
             
-            // Set card appearance based on loading state
+            // Show/hide delete button based on editing mode
+            deleteButton.visibility = if (isEditingMode) View.VISIBLE else View.GONE
+            
+            // Set delete button click listener
+            // Use setOnTouchListener to prevent drag interference
+            deleteButton.setOnClickListener {
+                if (isEditingMode) {
+                    onDeleteClick(entity)
+                }
+            }
+            
+            // Prevent delete button from interfering with drag
+            deleteButton.setOnTouchListener { view, event ->
+                // Allow the touch event to propagate if not in editing mode
+                if (!isEditingMode) {
+                    false
+                } else {
+                    // In editing mode, handle the click but don't block drag
+                    false
+                }
+            }
+            
+            // Set card appearance based on loading state and editing mode
             if (isCurrentlyLoading) {
                 // Disabled/grey appearance when loading
                 cardView.setCardBackgroundColor(Color.parseColor("#E0E0E0"))
@@ -77,12 +108,13 @@ class ControlEntityAdapter(
                 cardView.strokeColor = Color.parseColor("#2196F3")
                 cardView.strokeWidth = 2
                 cardView.alpha = 1.0f
-                itemView.isEnabled = true
-                itemView.isClickable = true
+                // In editing mode, disable item clicks
+                itemView.isEnabled = !isEditingMode
+                itemView.isClickable = !isEditingMode
             }
             
             itemView.setOnClickListener {
-                if (!isCurrentlyLoading) {
+                if (!isCurrentlyLoading && !isEditingMode) {
                     onItemClick(entity)
                 }
             }

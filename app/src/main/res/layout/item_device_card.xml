@@ -25,6 +25,19 @@
             android:maxLines="3"
             android:ellipsize="end" />
 
+        <ImageButton
+            android:id="@+id/delete_button"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="4dp"
+            android:background="@drawable/delete_button_background"
+            android:contentDescription="Delete item"
+            android:padding="6dp"
+            android:src="@drawable/ic_close_black_24dp"
+            android:visibility="gone"
+            app:tint="@android:color/white" />
+
     </FrameLayout>
 
 </com.google.android.material.card.MaterialCardView>

@@ -29,6 +29,10 @@ class ControlViewModel(application: Application) : AndroidViewModel(application)
     private val _loadingEntityIds = MutableStateFlow<Set<String>>(emptySet())
     val loadingEntityIds: StateFlow<Set<String>> = _loadingEntityIds.asStateFlow()
     
+    // Track editing mode state
+    private val _isEditingMode = MutableStateFlow(false)
+    val isEditingMode: StateFlow<Boolean> = _isEditingMode.asStateFlow()
+    
     init {
         // Load all stored entities in a single list
         viewModelScope.launch {
@@ -80,5 +84,52 @@ class ControlViewModel(application: Application) : AndroidViewModel(application)
      */
     fun isLoading(entityId: String): Boolean {
         return _loadingEntityIds.value.contains(entityId)
+    }
+    
+    /**
+     * Toggle editing mode
+     */
+    fun toggleEditingMode() {
+        _isEditingMode.value = !_isEditingMode.value
+    }
+    
+    /**
+     * Remove an entity from the list
+     */
+    fun removeEntity(entity: Entity) {
+        viewModelScope.launch {
+            val currentEntities = _allEntities.value.toMutableList()
+            val index = currentEntities.indexOfFirst { 
+                it.deviceId == entity.deviceId && it.type == entity.type 
+            }
+            if (index >= 0) {
+                currentEntities.removeAt(index)
+                storageManager.saveEntities(currentEntities)
+            }
+        }
+    }
+    
+    /**
+     * Reorder entities by moving an item from one position to another
+     */
+    fun reorderEntities(fromPosition: Int, toPosition: Int) {
+        viewModelScope.launch {
+            val currentEntities = _allEntities.value.toMutableList()
+            if (fromPosition in currentEntities.indices && toPosition in currentEntities.indices) {
+                val item = currentEntities.removeAt(fromPosition)
+                currentEntities.add(toPosition, item)
+                storageManager.saveEntities(currentEntities)
+            }
+        }
+    }
+    
+    /**
+     * Save the entity order from the provided list
+     * Used after drag-and-drop operations complete
+     */
+    fun saveEntityOrder(entities: List<Entity>) {
+        viewModelScope.launch {
+            storageManager.saveEntities(entities)
+        }
     }
 }
