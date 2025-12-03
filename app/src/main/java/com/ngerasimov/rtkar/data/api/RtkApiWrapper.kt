@@ -142,6 +142,34 @@ class RtkApiWrapper(private val context: Context) {
     }
     
     /**
+     * Open a device (trigger control action)
+     * @param authToken Authentication token
+     * @param deviceId Device ID to open
+     * @return Result indicating success or failure
+     */
+    suspend fun openDevice(
+        authToken: String,
+        deviceId: String
+    ): Result<Unit> {
+        return try {
+            val response = apiService.openDevice(
+                id = deviceId,
+                authorization = authToken,
+                accept = "application/json",
+                referer = "https://key.rt.ru/"
+            )
+            
+            if (response.isSuccessful) {
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("Failed to open device: ${response.code()} ${response.message()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
+    /**
      * Clear all cached data
      */
     suspend fun clearCache() {
