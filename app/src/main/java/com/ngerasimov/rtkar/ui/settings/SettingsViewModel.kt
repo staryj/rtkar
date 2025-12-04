@@ -151,16 +151,4 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun isDeviceSelected(deviceId: String): Boolean {
         return _selectedDeviceIds.value.contains(deviceId)
     }
-    
-    /**
-     * Force reload devices from API
-     */
-    fun reloadDevices() {
-        viewModelScope.launch {
-            val token = storageManager.authToken.first()
-            if (!token.isNullOrEmpty()) {
-                loadDevices(token)
-            }
-        }
-    }
 }

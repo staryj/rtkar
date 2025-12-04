@@ -79,46 +79,6 @@ class StorageManager(private val context: Context) {
     }
 
     /**
-     * Add a single entity to the list
-     */
-    suspend fun addEntity(entity: Entity) {
-        val currentEntities = getEntitiesSync()
-        val updatedEntities = currentEntities + entity
-        saveEntities(updatedEntities)
-    }
-
-    /**
-     * Update an entity at the given index
-     */
-    suspend fun updateEntity(index: Int, entity: Entity) {
-        val currentEntities = getEntitiesSync().toMutableList()
-        if (index in currentEntities.indices) {
-            currentEntities[index] = entity
-            saveEntities(currentEntities)
-        }
-    }
-
-    /**
-     * Remove an entity at the given index
-     */
-    suspend fun removeEntity(index: Int) {
-        val currentEntities = getEntitiesSync().toMutableList()
-        if (index in currentEntities.indices) {
-            currentEntities.removeAt(index)
-            saveEntities(currentEntities)
-        }
-    }
-
-    /**
-     * Clear all entities
-     */
-    suspend fun clearEntities() {
-        context.dataStore.edit { preferences ->
-            preferences.remove(ENTITIES_KEY)
-        }
-    }
-
-    /**
      * Clear all stored data (auth token and entities)
      */
     suspend fun clearAllData() {

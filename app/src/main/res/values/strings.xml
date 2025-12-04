@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">RTKar</string>
-    <string name="action_settings">Настройки</string>
 
     <string name="menu_control">Управление</string>
     <string name="menu_settings">Настройки</string>

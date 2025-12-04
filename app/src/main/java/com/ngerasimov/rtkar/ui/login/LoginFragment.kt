@@ -118,15 +118,13 @@ class LoginFragment : Fragment() {
                     // User is not authorized - ensure WebView is set up
                     Log.d("LoginFragment", "User not authorized in onResume, ensuring WebView is set up")
                     // Always set up WebView if user is not authorized (handles case after logout)
-                    if (binding.webView != null) {
-                        // Check if WebView needs to be set up (no URL loaded or WebView was destroyed)
-                        val currentUrl = binding.webView.url
-                        if (currentUrl.isNullOrEmpty() || !currentUrl.startsWith("http")) {
-                            Log.d("LoginFragment", "WebView not loaded, setting up now")
-                            setupWebView()
-                        } else {
-                            Log.d("LoginFragment", "WebView already loaded with URL: $currentUrl")
-                        }
+                    // Check if WebView needs to be set up (no URL loaded or WebView was destroyed)
+                    val currentUrl = binding.webView.url
+                    if (currentUrl.isNullOrEmpty() || !currentUrl.startsWith("http")) {
+                        Log.d("LoginFragment", "WebView not loaded, setting up now")
+                        setupWebView()
+                    } else {
+                        Log.d("LoginFragment", "WebView already loaded with URL: $currentUrl")
                     }
                 }
             }
@@ -138,11 +136,6 @@ class LoginFragment : Fragment() {
         val webView = binding.webView
         
         Log.d("LoginFragment", "Setting up WebView")
-        
-        if (webView == null) {
-            Log.e("LoginFragment", "WebView is null, cannot set up")
-            return
-        }
         
         // Clear all WebView data before loading login page
         Log.d("LoginFragment", "Clearing WebView cache, cookies, and storage")

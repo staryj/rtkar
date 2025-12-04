@@ -123,20 +123,6 @@ class ControlViewModel(application: Application) : AndroidViewModel(application)
     }
     
     /**
-     * Reorder entities by moving an item from one position to another
-     */
-    fun reorderEntities(fromPosition: Int, toPosition: Int) {
-        viewModelScope.launch {
-            val currentEntities = _allEntities.value.toMutableList()
-            if (fromPosition in currentEntities.indices && toPosition in currentEntities.indices) {
-                val item = currentEntities.removeAt(fromPosition)
-                currentEntities.add(toPosition, item)
-                storageManager.saveEntities(currentEntities)
-            }
-        }
-    }
-    
-    /**
      * Save the entity order from the provided list
      * Used after drag-and-drop operations complete
      */

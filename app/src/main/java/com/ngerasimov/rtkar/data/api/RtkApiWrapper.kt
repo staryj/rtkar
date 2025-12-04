@@ -170,18 +170,6 @@ class RtkApiWrapper(private val context: Context) {
     }
     
     /**
-     * Clear all cached data
-     */
-    suspend fun clearCache() {
-        context.apiDataStore.edit { preferences ->
-            preferences.remove(BARRIER_DEVICES_KEY)
-            preferences.remove(BARRIER_CACHE_TIMESTAMP_KEY)
-            preferences.remove(INTERCOM_DEVICES_KEY)
-            preferences.remove(INTERCOM_CACHE_TIMESTAMP_KEY)
-        }
-    }
-    
-    /**
      * Get cached barrier devices if cache is still valid
      */
     private suspend fun getCachedBarrierDevices(): List<Device>? {
