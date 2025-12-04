@@ -6,8 +6,10 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.CookieManager
 import android.webkit.JavascriptInterface
 import android.webkit.WebResourceRequest
+import android.webkit.WebStorage
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.fragment.app.Fragment
@@ -141,6 +143,28 @@ class LoginFragment : Fragment() {
             Log.e("LoginFragment", "WebView is null, cannot set up")
             return
         }
+        
+        // Clear all WebView data before loading login page
+        Log.d("LoginFragment", "Clearing WebView cache, cookies, and storage")
+        
+        // Clear cookies
+        val cookieManager = CookieManager.getInstance()
+        cookieManager.removeAllCookies(null)
+        cookieManager.flush()
+        
+        // Clear cache (including disk cache)
+        webView.clearCache(true)
+        
+        // Clear history
+        webView.clearHistory()
+        
+        // Clear form data
+        webView.clearFormData()
+        
+        // Clear WebStorage (localStorage, sessionStorage, etc.)
+        WebStorage.getInstance().deleteAllData()
+        
+        Log.d("LoginFragment", "WebView data cleared")
         
         // Make sure WebView is visible
         webView.visibility = View.VISIBLE

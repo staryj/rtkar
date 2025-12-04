@@ -23,7 +23,7 @@
         android:id="@+id/empty_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="No devices available"
+        android:text="No devices selected on Settings page"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/recycler_view_control"
         app:layout_constraintEnd_toEndOf="@id/recycler_view_control"
