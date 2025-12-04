@@ -4,12 +4,13 @@ import android.graphics.PorterDuff
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
@@ -41,12 +42,13 @@ class ControlEntityAdapter(
         
         // Calculate item size based on RecyclerView dimensions and grid configuration
         // Optimized for 1920x720 device
-        view.viewTreeObserver.addOnGlobalLayoutListener(object : android.view.ViewTreeObserver.OnGlobalLayoutListener {
+        view.viewTreeObserver.addOnGlobalLayoutListener(object :
+            ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 view.viewTreeObserver.removeOnGlobalLayoutListener(this)
                 
-                val recyclerView = parent as? androidx.recyclerview.widget.RecyclerView
-                val layoutManager = recyclerView?.layoutManager as? androidx.recyclerview.widget.GridLayoutManager
+                val recyclerView = parent as? RecyclerView
+                val layoutManager = recyclerView?.layoutManager as? GridLayoutManager
                 val adapter = recyclerView?.adapter as? ControlEntityAdapter
                 
                 if (recyclerView != null && layoutManager != null && adapter != null && 
@@ -64,7 +66,6 @@ class ControlEntityAdapter(
                     
                     // Calculate available space
                     // RecyclerView padding: 4dp start, 4dp end, 4dp top, 80dp bottom
-                    val horizontalPadding = (4 * 2 * density).toInt()
                     val verticalPadding = (4 * density).toInt() // Top padding only for height calculation
                     val bottomPadding = (80 * density).toInt()
                     
@@ -129,7 +130,7 @@ class ControlEntityAdapter(
             }
             
             // Prevent delete button from interfering with drag
-            deleteButton.setOnTouchListener { view, event ->
+            deleteButton.setOnTouchListener { _, _ ->
                 // Allow the touch event to propagate if not in editing mode
                 if (!isEditingMode) {
                     false

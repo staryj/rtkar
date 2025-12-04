@@ -61,7 +61,7 @@ class ControlViewModel(application: Application) : AndroidViewModel(application)
                 // Get auth token
                 val authToken = storageManager.authToken.first()
                 if (authToken.isNullOrEmpty()) {
-                    val errorMsg = getApplication<android.app.Application>().getString(R.string.error_auth_token_missing)
+                    val errorMsg = getApplication<Application>().getString(R.string.error_auth_token_missing)
                     Log.e(TAG, "Auth token is empty, cannot open device")
                     _errorMessage.value = errorMsg
                     return@launch
@@ -77,12 +77,12 @@ class ControlViewModel(application: Application) : AndroidViewModel(application)
                     // Clear any previous error
                     _errorMessage.value = null
                 }.onFailure { exception ->
-                    val errorMsg = exception.message ?: getApplication<android.app.Application>().getString(R.string.error_failed_to_open_device)
+                    val errorMsg = exception.message ?: getApplication<Application>().getString(R.string.error_failed_to_open_device)
                     Log.e(TAG, "Failed to open device ${entity.deviceId}", exception)
                     _errorMessage.value = errorMsg
                 }
             } catch (e: Exception) {
-                val errorMsg = e.message ?: getApplication<android.app.Application>().getString(R.string.error_opening_device)
+                val errorMsg = e.message ?: getApplication<Application>().getString(R.string.error_opening_device)
                 Log.e(TAG, "Error triggering control action for ${entity.deviceId}", e)
                 _errorMessage.value = errorMsg
             } finally {

@@ -12,8 +12,6 @@ import com.ngerasimov.rtkar.data.api.RtkApiWrapper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
@@ -82,7 +80,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 Log.d(TAG, "Barriers available for display: ${filtered.size}")
             }.onFailure { exception ->
                 Log.e(TAG, "Failed to load barriers", exception)
-                val errorMsg = getApplication<android.app.Application>().getString(
+                val errorMsg = getApplication<Application>().getString(
                     R.string.error_failed_to_load_barriers,
                     exception.message ?: ""
                 )
@@ -99,7 +97,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 Log.d(TAG, "Intercoms available for display: ${filtered.size}")
             }.onFailure { exception ->
                 Log.e(TAG, "Failed to load intercoms", exception)
-                val errorMsg = getApplication<android.app.Application>().getString(
+                val errorMsg = getApplication<Application>().getString(
                     R.string.error_failed_to_load_intercoms,
                     exception.message ?: ""
                 )
@@ -107,7 +105,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error loading devices", e)
-            val errorMsg = getApplication<android.app.Application>().getString(
+            val errorMsg = getApplication<Application>().getString(
                 R.string.error_loading_devices,
                 e.message ?: ""
             )

@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.decodeFromString
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "app_storage")
 
@@ -44,7 +43,7 @@ class StorageManager(private val context: Context) {
         } else {
             try {
                 json.decodeFromString<List<Entity>>(entitiesJson)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 emptyList()
             }
         }
@@ -56,15 +55,6 @@ class StorageManager(private val context: Context) {
     suspend fun saveAuthToken(token: String) {
         context.dataStore.edit { preferences ->
             preferences[AUTH_TOKEN_KEY] = token
-        }
-    }
-
-    /**
-     * Clear the authentication token
-     */
-    suspend fun clearAuthToken() {
-        context.dataStore.edit { preferences ->
-            preferences.remove(AUTH_TOKEN_KEY)
         }
     }
 
@@ -100,18 +90,10 @@ class StorageManager(private val context: Context) {
         } else {
             try {
                 json.decodeFromString<List<Entity>>(entitiesJson)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 emptyList()
             }
         }
-    }
-    
-    /**
-     * Check if a device is selected (exists in entities)
-     */
-    suspend fun isDeviceSelected(deviceId: String, type: EntityType): Boolean {
-        val entities = getEntitiesSync()
-        return entities.any { it.deviceId == deviceId && it.type == type }
     }
     
     /**

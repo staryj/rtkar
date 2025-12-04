@@ -9,8 +9,6 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.first
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.builtins.ListSerializer
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -185,7 +183,7 @@ class RtkApiWrapper(private val context: Context) {
         
         return try {
             json.decodeFromString(ListSerializer(Device.serializer()), cachedJson)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }
@@ -206,7 +204,7 @@ class RtkApiWrapper(private val context: Context) {
         
         return try {
             json.decodeFromString(ListSerializer(Device.serializer()), cachedJson)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }
