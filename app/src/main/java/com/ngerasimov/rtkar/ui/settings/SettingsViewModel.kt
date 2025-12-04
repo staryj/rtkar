@@ -4,6 +4,7 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.ngerasimov.rtkar.R
 import com.ngerasimov.rtkar.data.EntityType
 import com.ngerasimov.rtkar.data.StorageManager
 import com.ngerasimov.rtkar.data.api.Device
@@ -81,7 +82,11 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 Log.d(TAG, "Barriers available for display: ${filtered.size}")
             }.onFailure { exception ->
                 Log.e(TAG, "Failed to load barriers", exception)
-                _error.value = "Failed to load barriers: ${exception.message}"
+                val errorMsg = getApplication<android.app.Application>().getString(
+                    R.string.error_failed_to_load_barriers,
+                    exception.message ?: ""
+                )
+                _error.value = errorMsg
             }
             
             // Load intercoms
@@ -94,11 +99,19 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 Log.d(TAG, "Intercoms available for display: ${filtered.size}")
             }.onFailure { exception ->
                 Log.e(TAG, "Failed to load intercoms", exception)
-                _error.value = "Failed to load intercoms: ${exception.message}"
+                val errorMsg = getApplication<android.app.Application>().getString(
+                    R.string.error_failed_to_load_intercoms,
+                    exception.message ?: ""
+                )
+                _error.value = errorMsg
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error loading devices", e)
-            _error.value = "Error: ${e.message}"
+            val errorMsg = getApplication<android.app.Application>().getString(
+                R.string.error_loading_devices,
+                e.message ?: ""
+            )
+            _error.value = errorMsg
         } finally {
             _isLoading.value = false
             Log.d(TAG, "Loading completed. Barriers: ${_barrierDevices.value.size}, Intercoms: ${_intercomDevices.value.size}")

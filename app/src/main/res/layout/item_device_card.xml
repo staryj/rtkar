@@ -32,7 +32,7 @@
             android:layout_gravity="top|end"
             android:layout_margin="4dp"
             android:background="@drawable/delete_button_background"
-            android:contentDescription="Delete item"
+            android:contentDescription="@string/device_delete_content_description"
             android:padding="6dp"
             android:src="@drawable/ic_close_black_24dp"
             android:visibility="gone"
