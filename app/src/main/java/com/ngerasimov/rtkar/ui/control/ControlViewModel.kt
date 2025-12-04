@@ -33,6 +33,10 @@ class ControlViewModel(application: Application) : AndroidViewModel(application)
     private val _isEditingMode = MutableStateFlow(false)
     val isEditingMode: StateFlow<Boolean> = _isEditingMode.asStateFlow()
     
+    // Track error messages
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+    
     init {
         // Load all stored entities in a single list
         viewModelScope.launch {
@@ -56,7 +60,9 @@ class ControlViewModel(application: Application) : AndroidViewModel(application)
                 // Get auth token
                 val authToken = storageManager.authToken.first()
                 if (authToken.isNullOrEmpty()) {
+                    val errorMsg = "Authentication token is missing. Please log in again."
                     Log.e(TAG, "Auth token is empty, cannot open device")
+                    _errorMessage.value = errorMsg
                     return@launch
                 }
                 
@@ -67,11 +73,17 @@ class ControlViewModel(application: Application) : AndroidViewModel(application)
                 
                 result.onSuccess {
                     Log.d(TAG, "Successfully opened device ${entity.deviceId}")
+                    // Clear any previous error
+                    _errorMessage.value = null
                 }.onFailure { exception ->
+                    val errorMsg = exception.message ?: "Failed to open device"
                     Log.e(TAG, "Failed to open device ${entity.deviceId}", exception)
+                    _errorMessage.value = errorMsg
                 }
             } catch (e: Exception) {
+                val errorMsg = e.message ?: "Error opening device"
                 Log.e(TAG, "Error triggering control action for ${entity.deviceId}", e)
+                _errorMessage.value = errorMsg
             } finally {
                 // Remove entity from loading set
                 _loadingEntityIds.value = _loadingEntityIds.value - entity.deviceId
@@ -131,5 +143,12 @@ class ControlViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             storageManager.saveEntities(entities)
         }
+    }
+    
+    /**
+     * Clear the error message
+     */
+    fun clearError() {
+        _errorMessage.value = null
     }
 }
