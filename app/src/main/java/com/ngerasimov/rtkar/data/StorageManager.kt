@@ -119,6 +119,16 @@ class StorageManager(private val context: Context) {
     }
 
     /**
+     * Clear all stored data (auth token and entities)
+     */
+    suspend fun clearAllData() {
+        context.dataStore.edit { preferences ->
+            preferences.remove(AUTH_TOKEN_KEY)
+            preferences.remove(ENTITIES_KEY)
+        }
+    }
+
+    /**
      * Get entities synchronously (for one-time reads)
      * Note: This should be used sparingly, prefer Flow-based access
      */

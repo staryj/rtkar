@@ -42,14 +42,21 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        // Setup WebView if needed (will be checked in onResume)
-        if (!hasCheckedAuth) {
-            lifecycleScope.launch {
-                val authToken = viewModel.getAuthToken()
-                if (authToken.isNullOrEmpty()) {
-                    // User not authorized, show login WebView
-                    setupWebView()
-                }
+        // Reset flags when view is created (handles fragment recreation/reuse after logout)
+        hasCheckedAuth = false
+        isTokenCaptured = false
+        
+        Log.d("LoginFragment", "onViewCreated - checking auth status")
+        
+        // Check auth status and set up WebView if needed
+        lifecycleScope.launch {
+            val authToken = viewModel.getAuthToken()
+            Log.d("LoginFragment", "Auth token in onViewCreated: ${if (authToken.isNullOrEmpty()) "empty" else "present"}")
+            
+            if (authToken.isNullOrEmpty()) {
+                // User not authorized, show login WebView
+                Log.d("LoginFragment", "User not authorized, setting up WebView")
+                setupWebView()
             }
         }
     }
@@ -57,11 +64,15 @@ class LoginFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         
+        Log.d("LoginFragment", "onResume - hasCheckedAuth: $hasCheckedAuth")
+        
         // Check auth and navigate in onResume when NavController is definitely ready
         if (!hasCheckedAuth) {
             hasCheckedAuth = true
             lifecycleScope.launch {
                 val authToken = viewModel.getAuthToken()
+                Log.d("LoginFragment", "Auth token in onResume: ${if (authToken.isNullOrEmpty()) "empty" else "present"}")
+                
                 if (!authToken.isNullOrEmpty()) {
                     // User is already authorized, check if entities exist
                     val entities = viewModel.getEntities()
@@ -101,6 +112,20 @@ class LoginFragment : Fragment() {
                             }, 300)
                         }
                     }
+                } else {
+                    // User is not authorized - ensure WebView is set up
+                    Log.d("LoginFragment", "User not authorized in onResume, ensuring WebView is set up")
+                    // Always set up WebView if user is not authorized (handles case after logout)
+                    if (binding.webView != null) {
+                        // Check if WebView needs to be set up (no URL loaded or WebView was destroyed)
+                        val currentUrl = binding.webView.url
+                        if (currentUrl.isNullOrEmpty() || !currentUrl.startsWith("http")) {
+                            Log.d("LoginFragment", "WebView not loaded, setting up now")
+                            setupWebView()
+                        } else {
+                            Log.d("LoginFragment", "WebView already loaded with URL: $currentUrl")
+                        }
+                    }
                 }
             }
         }
@@ -109,6 +134,16 @@ class LoginFragment : Fragment() {
     @SuppressLint("SetJavaScriptEnabled")
     private fun setupWebView() {
         val webView = binding.webView
+        
+        Log.d("LoginFragment", "Setting up WebView")
+        
+        if (webView == null) {
+            Log.e("LoginFragment", "WebView is null, cannot set up")
+            return
+        }
+        
+        // Make sure WebView is visible
+        webView.visibility = View.VISIBLE
         
         webView.settings.apply {
             javaScriptEnabled = true
@@ -120,6 +155,8 @@ class LoginFragment : Fragment() {
 
         // Add JavaScript interface to receive Authorization header
         webView.addJavascriptInterface(WebAppInterface(), "AndroidInterface")
+        
+        Log.d("LoginFragment", "WebView configured, loading URL")
 
         webView.webViewClient = object : WebViewClient() {
             override fun shouldInterceptRequest(
@@ -173,6 +210,7 @@ class LoginFragment : Fragment() {
 
         // Load the login URL
         webView.loadUrl("https://key.rt.ru/main/pwa/dashboard")
+        Log.d("LoginFragment", "WebView URL loaded: https://key.rt.ru/main/pwa/dashboard")
     }
 
     private fun injectInterceptionScript(webView: WebView?) {

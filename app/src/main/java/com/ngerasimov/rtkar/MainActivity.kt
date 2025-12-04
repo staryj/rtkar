@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import androidx.appcompat.app.AlertDialog
 import com.google.android.material.navigation.NavigationView
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
@@ -71,12 +72,49 @@ class MainActivity : AppCompatActivity() {
                 val currentDestination = navController.currentDestination?.id
                 if (!isAuthorized && currentDestination != null && currentDestination != R.id.nav_login) {
                     // User logged out or token cleared - redirect to login
-                    try {
-                        navController.navigate(R.id.nav_login) {
-                            popUpTo(R.id.nav_control) { inclusive = true }
+                    // Use post to ensure navigation graph is ready after setupNavigation
+                    binding.root.post {
+                        try {
+                            // Get fresh reference to navController after setupNavigation
+                            val navHostFragment =
+                                supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main) as? NavHostFragment
+                            val currentNavController = navHostFragment?.navController ?: navController
+                            
+                            // Verify the destination exists in the graph
+                            val loginNode = currentNavController.graph.findNode(R.id.nav_login)
+                            if (loginNode != null) {
+                                // Navigate to login and pop back stack to start destination
+                                // Use the destination ID directly instead of graph ID
+                                currentNavController.navigate(R.id.nav_login) {
+                                    // Pop everything up to and including the start destination
+                                    popUpTo(R.id.nav_login) {
+                                        inclusive = true
+                                    }
+                                }
+                            } else {
+                                Log.w("MainActivity", "Login destination not found in graph, will retry")
+                                // Retry after a short delay
+                                binding.root.postDelayed({
+                                    try {
+                                        val retryNavController = (supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main) as? NavHostFragment)?.navController
+                                        retryNavController?.navigate(R.id.nav_login)
+                                    } catch (e: Exception) {
+                                        Log.e("MainActivity", "Error navigating to login after retry", e)
+                                    }
+                                }, 100)
+                            }
+                        } catch (e: Exception) {
+                            Log.e("MainActivity", "Error navigating to login after logout", e)
+                            // Final fallback: try simple navigation
+                            try {
+                                binding.root.postDelayed({
+                                    val fallbackNavController = (supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main) as? NavHostFragment)?.navController
+                                    fallbackNavController?.navigate(R.id.nav_login)
+                                }, 200)
+                            } catch (e2: Exception) {
+                                Log.e("MainActivity", "Final navigation attempt failed", e2)
+                            }
                         }
-                    } catch (e: Exception) {
-                        // Navigation might fail if graph is not ready, ignore
                     }
                 }
                 // Note: We don't auto-navigate when user logs in from LoginFragment
@@ -97,16 +135,38 @@ class MainActivity : AppCompatActivity() {
             
             binding.appBarMain.contentMain.bottomNavView?.visibility = View.VISIBLE
 
-            binding.navView?.let {
-                appBarConfiguration = AppBarConfiguration(
-                    setOf(
-                        R.id.nav_control, R.id.nav_settings
-                    ),
-                    binding.drawerLayout
-                )
-                setupActionBarWithNavController(navController, appBarConfiguration)
-                it.setupWithNavController(navController)
+        binding.navView?.let {
+            appBarConfiguration = AppBarConfiguration(
+                setOf(
+                    R.id.nav_control, R.id.nav_settings
+                ),
+                binding.drawerLayout
+            )
+            setupActionBarWithNavController(navController, appBarConfiguration)
+            
+            // Handle navigation item selection (including logout)
+            it.setNavigationItemSelectedListener { menuItem ->
+                when (menuItem.itemId) {
+                    R.id.nav_logout -> {
+                        showLogoutConfirmation()
+                        binding.drawerLayout?.closeDrawers()
+                        true
+                    }
+                    R.id.nav_control, R.id.nav_settings -> {
+                        // Let setupWithNavController handle these
+                        // But we need to manually navigate since we're overriding the listener
+                        navController.navigate(menuItem.itemId)
+                        binding.drawerLayout?.closeDrawers()
+                        true
+                    }
+                    else -> {
+                        navController.navigate(menuItem.itemId)
+                        binding.drawerLayout?.closeDrawers()
+                        true
+                    }
+                }
             }
+        }
 
             binding.appBarMain.contentMain.bottomNavView?.let {
                 appBarConfiguration = AppBarConfiguration(
@@ -138,6 +198,7 @@ class MainActivity : AppCompatActivity() {
         binding.navView?.menu?.let { menu ->
             menu.findItem(R.id.nav_control)?.isVisible = isAuthorized
             menu.findItem(R.id.nav_settings)?.isVisible = isAuthorized
+            menu.findItem(R.id.nav_logout)?.isVisible = isAuthorized
             menu.findItem(R.id.nav_login)?.isVisible = !isAuthorized
         }
 
@@ -181,5 +242,27 @@ class MainActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+    }
+
+    private fun showLogoutConfirmation() {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.logout_confirmation_title)
+            .setMessage(R.string.logout_confirmation_message)
+            .setPositiveButton(R.string.yes) { _, _ ->
+                performLogout()
+            }
+            .setNegativeButton(R.string.no, null)
+            .show()
+    }
+
+    private fun performLogout() {
+        lifecycleScope.launch {
+            // Clear all stored data
+            // This will trigger the auth token observer which will handle navigation
+            storageManager.clearAllData()
+            
+            // The observer in onCreate will automatically navigate to login
+            // when it detects the auth token is cleared. We don't need to navigate manually here.
+        }
     }
 }
