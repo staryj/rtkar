@@ -35,22 +35,21 @@ class MainActivity : AppCompatActivity() {
 
         storageManager = StorageManager(this)
 
-        val navHostFragment =
-            (supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main) as NavHostFragment?)!!
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main) as? NavHostFragment
+            ?: run {
+                Log.e("MainActivity", "NavHostFragment not found in onCreate")
+                return
+            }
         val navController = navHostFragment.navController
 
         // Setup navigation based on auth status
         // Check if entities exist and set start destination accordingly
         lifecycleScope.launch {
             val authToken = storageManager.authToken.first()
-            val isAuthorized = !authToken.isNullOrEmpty()
+            val isAuthorized = !authToken.isNullOrBlank()
             
-            // Log auth_token on application startup
-            if (authToken != null) {
-                Log.d("MainActivity", "Auth token on startup: $authToken")
-            } else {
-                Log.d("MainActivity", "No auth token on startup")
-            }
+            // Log auth status on application startup (without exposing token)
+            Log.d("MainActivity", "Auth token on startup: ${if (authToken != null) "present" else "null"}")
             
             setupNavigation(isAuthorized)
             
@@ -61,7 +60,7 @@ class MainActivity : AppCompatActivity() {
         // Observe auth token changes to update UI
         lifecycleScope.launch {
             storageManager.authToken.collect { authToken ->
-                val isAuthorized = !authToken.isNullOrEmpty()
+                val isAuthorized = !authToken.isNullOrBlank()
                 
                 // Update navigation configuration
                 setupNavigation(isAuthorized)
@@ -122,8 +121,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupNavigation(isAuthorized: Boolean) {
-        val navHostFragment =
-            (supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main) as NavHostFragment?)!!
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main) as? NavHostFragment
+            ?: run {
+                Log.e("MainActivity", "NavHostFragment not found in setupNavigation")
+                return
+            }
         val navController = navHostFragment.navController
 
         if (isAuthorized) {
@@ -220,7 +222,7 @@ class MainActivity : AppCompatActivity() {
             // Update overflow menu visibility based on auth status
             lifecycleScope.launch {
                 val authToken = storageManager.authToken.first()
-                val isAuthorized = !authToken.isNullOrEmpty()
+                val isAuthorized = !authToken.isNullOrBlank()
                 menu.findItem(R.id.nav_settings)?.isVisible = isAuthorized
             }
         }

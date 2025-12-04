@@ -43,7 +43,8 @@ class StorageManager(private val context: Context) {
         } else {
             try {
                 json.decodeFromString<List<Entity>>(entitiesJson)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                android.util.Log.e("StorageManager", "Failed to deserialize entities from storage", e)
                 emptyList()
             }
         }
@@ -90,7 +91,8 @@ class StorageManager(private val context: Context) {
         } else {
             try {
                 json.decodeFromString<List<Entity>>(entitiesJson)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                android.util.Log.e("StorageManager", "Failed to deserialize entities synchronously", e)
                 emptyList()
             }
         }

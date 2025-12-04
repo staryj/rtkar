@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -18,18 +18,26 @@ class ControlFragment : Fragment() {
     private var _binding: FragmentControlBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var viewModel: ControlViewModel
+    private val viewModel: ControlViewModel by viewModels()
     private lateinit var adapter: ControlEntityAdapter
     private var itemTouchHelper: ItemTouchHelper? = null
     private var isDragging = false
+    
+    companion object {
+        private const val GRID_COLUMNS_SMALL = 2
+        private const val GRID_COLUMNS_MEDIUM = 3
+        private const val GRID_COLUMNS_LARGE = 4
+        private const val GRID_COLUMNS_XLARGE = 5
+        private const val GRID_THRESHOLD_SMALL = 4
+        private const val GRID_THRESHOLD_MEDIUM = 9
+        private const val GRID_THRESHOLD_LARGE = 16
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewModel = ViewModelProvider(this)[ControlViewModel::class.java]
-
         _binding = FragmentControlBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
@@ -73,10 +81,10 @@ class ControlFragment : Fragment() {
     
     private fun updateGridLayout(itemCount: Int) {
         val columns = when {
-            itemCount <= 4 -> 2
-            itemCount <= 9 -> 3
-            itemCount <= 16 -> 4
-            else -> 5
+            itemCount <= GRID_THRESHOLD_SMALL -> GRID_COLUMNS_SMALL
+            itemCount <= GRID_THRESHOLD_MEDIUM -> GRID_COLUMNS_MEDIUM
+            itemCount <= GRID_THRESHOLD_LARGE -> GRID_COLUMNS_LARGE
+            else -> GRID_COLUMNS_XLARGE
         }
         
         val currentLayoutManager = binding.recyclerViewControl.layoutManager as? GridLayoutManager

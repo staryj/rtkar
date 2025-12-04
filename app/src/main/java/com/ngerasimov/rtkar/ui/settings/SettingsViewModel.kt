@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.ngerasimov.rtkar.R
 import com.ngerasimov.rtkar.data.EntityType
 import com.ngerasimov.rtkar.data.StorageManager
+import com.ngerasimov.rtkar.data.api.ApiError
 import com.ngerasimov.rtkar.data.api.Device
 import com.ngerasimov.rtkar.data.api.RtkApiWrapper
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,10 +52,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch {
             storageManager.authToken
                 .onEach { token ->
-                    Log.d(TAG, "Auth token flow value: ${if (token.isNullOrEmpty()) "empty" else "present (${token.take(10)}...)"}")
+                    Log.d(TAG, "Auth token flow value: ${if (token.isNullOrBlank()) "empty" else "present"}")
                 }
                 .collect { token ->
-                    if (!token.isNullOrEmpty()) {
+                    if (!token.isNullOrBlank()) {
                         Log.d(TAG, "Loading devices with token")
                         loadDevices(token)
                     } else {
@@ -80,10 +81,13 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 Log.d(TAG, "Barriers available for display: ${filtered.size}")
             }.onFailure { exception ->
                 Log.e(TAG, "Failed to load barriers", exception)
-                val errorMsg = getApplication<Application>().getString(
-                    R.string.error_failed_to_load_barriers,
-                    exception.message ?: ""
-                )
+                val errorMsg = when (exception) {
+                    is ApiError -> exception.getUserMessage(getApplication())
+                    else -> getApplication<Application>().getString(
+                        R.string.error_failed_to_load_barriers,
+                        exception.message ?: ""
+                    )
+                }
                 _error.value = errorMsg
             }
             
@@ -97,18 +101,24 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 Log.d(TAG, "Intercoms available for display: ${filtered.size}")
             }.onFailure { exception ->
                 Log.e(TAG, "Failed to load intercoms", exception)
-                val errorMsg = getApplication<Application>().getString(
-                    R.string.error_failed_to_load_intercoms,
-                    exception.message ?: ""
-                )
+                val errorMsg = when (exception) {
+                    is ApiError -> exception.getUserMessage(getApplication())
+                    else -> getApplication<Application>().getString(
+                        R.string.error_failed_to_load_intercoms,
+                        exception.message ?: ""
+                    )
+                }
                 _error.value = errorMsg
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error loading devices", e)
-            val errorMsg = getApplication<Application>().getString(
-                R.string.error_loading_devices,
-                e.message ?: ""
-            )
+            val errorMsg = when (e) {
+                is ApiError -> e.getUserMessage(getApplication())
+                else -> getApplication<Application>().getString(
+                    R.string.error_loading_devices,
+                    e.message ?: ""
+                )
+            }
             _error.value = errorMsg
         } finally {
             _isLoading.value = false

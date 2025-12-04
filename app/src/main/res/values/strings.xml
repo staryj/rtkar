@@ -32,4 +32,8 @@
     <string name="error_failed_to_load_barriers">Не удалось загрузить информацию о шлагбаумах: %1$s</string>
     <string name="error_failed_to_load_intercoms">Не удалось загрузить информацию о дверях: %1$s</string>
     <string name="error_loading_devices">Ошибка: %1$s</string>
+    <string name="error_network">Проблема с сетью. Проверьте подключение к интернету.</string>
+    <string name="error_unauthorized">Ошибка авторизации. Пожалуйста, войдите снова.</string>
+    <string name="error_server">Ошибка сервера (%1$d): %2$s</string>
+    <string name="error_unknown">Произошла неизвестная ошибка: %1$s</string>
 </resources>

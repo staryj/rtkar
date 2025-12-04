@@ -26,6 +26,15 @@ class ControlEntityAdapter(
     private var isEditingMode: Boolean = false
 ) : ListAdapter<Entity, ControlEntityAdapter.EntityViewHolder>(EntityDiffCallback()) {
     
+    companion object {
+        private const val RECYCLER_VIEW_PADDING_DP = 4
+        private const val RECYCLER_VIEW_BOTTOM_PADDING_DP = 80
+        private const val ITEM_MARGIN_DP = 4
+        private const val ITEM_MIN_HEIGHT_DP = 120
+        private const val ITEM_MARGIN_MULTIPLIER = 2
+        private const val DEFAULT_ROWS = 1
+    }
+    
     fun updateLoadingChecker(checker: (String) -> Boolean) {
         isLoading = checker
         notifyDataSetChanged()
@@ -59,18 +68,17 @@ class ControlEntityAdapter(
                     val rows = if (itemCount > 0) {
                         (itemCount + columns - 1) / columns // Ceiling division
                     } else {
-                        1
+                        DEFAULT_ROWS
                     }
                     
                     val density = parent.context.resources.displayMetrics.density
                     
                     // Calculate available space
-                    // RecyclerView padding: 4dp start, 4dp end, 4dp top, 80dp bottom
-                    val verticalPadding = (4 * density).toInt() // Top padding only for height calculation
-                    val bottomPadding = (80 * density).toInt()
+                    val verticalPadding = (RECYCLER_VIEW_PADDING_DP * density).toInt() // Top padding only for height calculation
+                    val bottomPadding = (RECYCLER_VIEW_BOTTOM_PADDING_DP * density).toInt()
                     
                     // Item margins: 4dp on each side = 8dp total per item
-                    val itemMargin = (4 * 2 * density).toInt()
+                    val itemMargin = (ITEM_MARGIN_DP * ITEM_MARGIN_MULTIPLIER * density).toInt()
                     
                     // Calculate item height to fill available vertical space
                     val availableHeight = recyclerView.height - verticalPadding - bottomPadding
@@ -81,8 +89,8 @@ class ControlEntityAdapter(
                         availableHeight
                     }
                     
-                    // Set minimum height to ensure readability (at least 120dp)
-                    val minHeight = (120 * density).toInt()
+                    // Set minimum height to ensure readability
+                    val minHeight = (ITEM_MIN_HEIGHT_DP * density).toInt()
                     val finalHeight = maxOf(itemHeight, minHeight)
                     
                     val layoutParams = view.layoutParams

@@ -29,6 +29,6 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
      */
     suspend fun saveAuthToken(token: String) {
         storageManager.saveAuthToken(token)
-        Log.d("LoginViewModel", "Auth token saved: $token")
+        Log.d("LoginViewModel", "Auth token saved successfully")
     }
 }

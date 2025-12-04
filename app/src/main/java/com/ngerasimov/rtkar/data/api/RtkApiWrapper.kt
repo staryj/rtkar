@@ -14,7 +14,10 @@ import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import okhttp3.MediaType.Companion.toMediaType
+import java.io.IOException
+import java.net.SocketTimeoutException
 import java.util.concurrent.TimeUnit
+import retrofit2.HttpException
 
 private val Context.apiDataStore: DataStore<Preferences> by preferencesDataStore(name = "rtk_api_cache")
 
@@ -26,6 +29,9 @@ class RtkApiWrapper(private val context: Context) {
     companion object {
         private const val BASE_URL = "https://household.key.rt.ru/"
         private const val CACHE_LIFETIME_MS = 24 * 60 * 60 * 1000L // 1 day in milliseconds
+        private const val HTTP_TIMEOUT_SECONDS = 30L
+        private const val HTTP_UNAUTHORIZED = 401
+        private const val HTTP_FORBIDDEN = 403
         
         // DataStore keys
         private val BARRIER_DEVICES_KEY = stringPreferencesKey("barrier_devices")
@@ -40,9 +46,9 @@ class RtkApiWrapper(private val context: Context) {
     }
     
     private val okHttpClient = OkHttpClient.Builder()
-        .connectTimeout(30, TimeUnit.SECONDS)
-        .readTimeout(30, TimeUnit.SECONDS)
-        .writeTimeout(30, TimeUnit.SECONDS)
+        .connectTimeout(HTTP_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+        .readTimeout(HTTP_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+        .writeTimeout(HTTP_TIMEOUT_SECONDS, TimeUnit.SECONDS)
         .build()
     
     private val retrofit = Retrofit.Builder()
@@ -52,6 +58,22 @@ class RtkApiWrapper(private val context: Context) {
         .build()
     
     private val apiService: RtkApiService = retrofit.create(RtkApiService::class.java)
+    
+    /**
+     * Convert exception to ApiError
+     */
+    private fun Exception.toApiError(): ApiError {
+        return when (this) {
+            is IOException, is SocketTimeoutException -> ApiError.NetworkError
+            is HttpException -> {
+                when (code()) {
+                    HTTP_UNAUTHORIZED, HTTP_FORBIDDEN -> ApiError.Unauthorized
+                    else -> ApiError.ServerError(code(), message())
+                }
+            }
+            else -> ApiError.UnknownError(this)
+        }
+    }
     
     /**
      * Get barrier devices with caching
@@ -86,12 +108,13 @@ class RtkApiWrapper(private val context: Context) {
             
             Result.success(devices)
         } catch (e: Exception) {
+            android.util.Log.e("RtkApiWrapper", "Failed to fetch barrier devices", e)
             // If API call fails, try to return cached data
             val cachedData = getCachedBarrierDevices()
             if (cachedData != null) {
                 Result.success(cachedData)
             } else {
-                Result.failure(e)
+                Result.failure(e.toApiError())
             }
         }
     }
@@ -129,12 +152,13 @@ class RtkApiWrapper(private val context: Context) {
             
             Result.success(devices)
         } catch (e: Exception) {
+            android.util.Log.e("RtkApiWrapper", "Failed to fetch intercom devices", e)
             // If API call fails, try to return cached data
             val cachedData = getCachedIntercomDevices()
             if (cachedData != null) {
                 Result.success(cachedData)
             } else {
-                Result.failure(e)
+                Result.failure(e.toApiError())
             }
         }
     }
@@ -160,10 +184,15 @@ class RtkApiWrapper(private val context: Context) {
             if (response.isSuccessful) {
                 Result.success(Unit)
             } else {
-                Result.failure(Exception("Failed to open device: ${response.code()} ${response.message()}"))
+                val error = when (response.code()) {
+                    HTTP_UNAUTHORIZED, HTTP_FORBIDDEN -> ApiError.Unauthorized
+                    else -> ApiError.ServerError(response.code(), response.message())
+                }
+                Result.failure(error)
             }
         } catch (e: Exception) {
-            Result.failure(e)
+            android.util.Log.e("RtkApiWrapper", "Failed to open device $deviceId", e)
+            Result.failure(e.toApiError())
         }
     }
     
@@ -183,7 +212,8 @@ class RtkApiWrapper(private val context: Context) {
         
         return try {
             json.decodeFromString(ListSerializer(Device.serializer()), cachedJson)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            android.util.Log.e("RtkApiWrapper", "Failed to deserialize cached barrier devices", e)
             null
         }
     }
@@ -204,7 +234,8 @@ class RtkApiWrapper(private val context: Context) {
         
         return try {
             json.decodeFromString(ListSerializer(Device.serializer()), cachedJson)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            android.util.Log.e("RtkApiWrapper", "Failed to deserialize cached intercom devices", e)
             null
         }
     }

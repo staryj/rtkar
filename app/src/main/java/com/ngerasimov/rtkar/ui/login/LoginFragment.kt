@@ -53,9 +53,9 @@ class LoginFragment : Fragment() {
         // Check auth status and set up WebView if needed
         lifecycleScope.launch {
             val authToken = viewModel.getAuthToken()
-            Log.d("LoginFragment", "Auth token in onViewCreated: ${if (authToken.isNullOrEmpty()) "empty" else "present"}")
+            Log.d("LoginFragment", "Auth token in onViewCreated: ${if (authToken.isNullOrBlank()) "empty" else "present"}")
             
-            if (authToken.isNullOrEmpty()) {
+            if (authToken.isNullOrBlank()) {
                 // User not authorized, show login WebView
                 Log.d("LoginFragment", "User not authorized, setting up WebView")
                 setupWebView()
@@ -73,9 +73,9 @@ class LoginFragment : Fragment() {
             hasCheckedAuth = true
             lifecycleScope.launch {
                 val authToken = viewModel.getAuthToken()
-                Log.d("LoginFragment", "Auth token in onResume: ${if (authToken.isNullOrEmpty()) "empty" else "present"}")
+                Log.d("LoginFragment", "Auth token in onResume: ${if (authToken.isNullOrBlank()) "empty" else "present"}")
                 
-                if (!authToken.isNullOrEmpty()) {
+                if (!authToken.isNullOrBlank()) {
                     // User is already authorized, check if entities exist
                     val entities = viewModel.getEntities()
                     // Wait for fragment to be fully resumed and NavController graph to be initialized
@@ -188,7 +188,7 @@ class LoginFragment : Fragment() {
                                 isTokenCaptured = true
                                 lifecycleScope.launch {
                                     viewModel.saveAuthToken(authHeader)
-                                    Log.d("LoginFragment", "Auth token captured from request: $authHeader")
+                                    Log.d("LoginFragment", "Auth token captured from request header")
                                     // Add a small delay to ensure navigation graph is ready
                                     delay(100)
                                     // Check if entities exist after login
@@ -389,7 +389,7 @@ class LoginFragment : Fragment() {
                 activity?.runOnUiThread {
                     lifecycleScope.launch {
                         viewModel.saveAuthToken(token)
-                        Log.d("LoginFragment", "Auth token captured from JS: $token")
+                        Log.d("LoginFragment", "Auth token captured from JavaScript interface")
                         // Add a small delay to ensure navigation graph is ready
                         delay(100)
                         // Check if entities exist after login
@@ -407,6 +407,12 @@ class LoginFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        binding.webView.apply {
+            clearHistory()
+            clearCache(true)
+            clearFormData()
+            CookieManager.getInstance().removeAllCookies(null)
+        }
         binding.webView.destroy()
         _binding = null
     }

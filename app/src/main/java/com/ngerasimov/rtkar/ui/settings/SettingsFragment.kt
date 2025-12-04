@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.ngerasimov.rtkar.data.EntityType
@@ -17,17 +17,19 @@ class SettingsFragment : Fragment() {
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var viewModel: SettingsViewModel
+    private val viewModel: SettingsViewModel by viewModels()
     private lateinit var barriersAdapter: DeviceListAdapter
     private lateinit var doorsAdapter: DeviceListAdapter
+    
+    companion object {
+        private const val GRID_ITEMS_PER_ROW = 6
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewModel = ViewModelProvider(this)[SettingsViewModel::class.java]
-
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
@@ -38,8 +40,6 @@ class SettingsFragment : Fragment() {
     }
 
     private fun setupRecyclerViews() {
-        val itemsPerRow = 6
-        
         // Setup barriers RecyclerView
         barriersAdapter = DeviceListAdapter(
             onItemClick = { device ->
@@ -49,7 +49,7 @@ class SettingsFragment : Fragment() {
                 viewModel.isDeviceSelected(deviceId)
             }
         )
-        binding.barriersRecyclerView.layoutManager = GridLayoutManager(requireContext(), itemsPerRow)
+        binding.barriersRecyclerView.layoutManager = GridLayoutManager(requireContext(), GRID_ITEMS_PER_ROW)
         binding.barriersRecyclerView.adapter = barriersAdapter
 
         // Setup doors (intercoms) RecyclerView
@@ -61,7 +61,7 @@ class SettingsFragment : Fragment() {
                 viewModel.isDeviceSelected(deviceId)
             }
         )
-        binding.doorsRecyclerView.layoutManager = GridLayoutManager(requireContext(), itemsPerRow)
+        binding.doorsRecyclerView.layoutManager = GridLayoutManager(requireContext(), GRID_ITEMS_PER_ROW)
         binding.doorsRecyclerView.adapter = doorsAdapter
     }
 

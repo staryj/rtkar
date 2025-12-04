@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.ngerasimov.rtkar.R
 import com.ngerasimov.rtkar.data.Entity
 import com.ngerasimov.rtkar.data.StorageManager
+import com.ngerasimov.rtkar.data.api.ApiError
 import com.ngerasimov.rtkar.data.api.RtkApiWrapper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -60,7 +61,7 @@ class ControlViewModel(application: Application) : AndroidViewModel(application)
             try {
                 // Get auth token
                 val authToken = storageManager.authToken.first()
-                if (authToken.isNullOrEmpty()) {
+                if (authToken.isNullOrBlank()) {
                     val errorMsg = getApplication<Application>().getString(R.string.error_auth_token_missing)
                     Log.e(TAG, "Auth token is empty, cannot open device")
                     _errorMessage.value = errorMsg
@@ -77,12 +78,18 @@ class ControlViewModel(application: Application) : AndroidViewModel(application)
                     // Clear any previous error
                     _errorMessage.value = null
                 }.onFailure { exception ->
-                    val errorMsg = exception.message ?: getApplication<Application>().getString(R.string.error_failed_to_open_device)
+                    val errorMsg = when (exception) {
+                        is ApiError -> exception.getUserMessage(getApplication())
+                        else -> exception.message ?: getApplication<Application>().getString(R.string.error_failed_to_open_device)
+                    }
                     Log.e(TAG, "Failed to open device ${entity.deviceId}", exception)
                     _errorMessage.value = errorMsg
                 }
             } catch (e: Exception) {
-                val errorMsg = e.message ?: getApplication<Application>().getString(R.string.error_opening_device)
+                val errorMsg = when (e) {
+                    is ApiError -> e.getUserMessage(getApplication())
+                    else -> e.message ?: getApplication<Application>().getString(R.string.error_opening_device)
+                }
                 Log.e(TAG, "Error triggering control action for ${entity.deviceId}", e)
                 _errorMessage.value = errorMsg
             } finally {
