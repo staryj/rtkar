@@ -11,6 +11,21 @@
         <item name="colorOnSecondary">@color/black</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        
+        <!-- Card colors -->
+        <item name="cardBackgroundActive">@color/card_background_active</item>
+        <item name="cardStrokeActive">@color/card_stroke_active</item>
+        <item name="cardBackgroundLoading">@color/card_background_loading</item>
+        <item name="cardStrokeLoading">@color/card_stroke_loading</item>
+        <item name="cardBackgroundInactive">@color/card_background_inactive</item>
+        <item name="cardStrokeInactive">@color/card_stroke_inactive</item>
+        <item name="cardBackgroundSelected">@color/card_background_selected</item>
+        <item name="cardStrokeSelected">@color/card_stroke_selected</item>
+        
+        <!-- Error and action colors -->
+        <item name="errorColor">@color/error_color</item>
+        <item name="deleteButtonColor">@color/delete_button_color</item>
+        
         <!-- Customize your theme here. -->
     </style>
 

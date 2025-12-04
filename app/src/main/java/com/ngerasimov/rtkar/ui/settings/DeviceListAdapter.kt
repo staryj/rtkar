@@ -1,14 +1,16 @@
 package com.ngerasimov.rtkar.ui.settings
 
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
+import com.google.android.material.color.MaterialColors
 import com.ngerasimov.rtkar.R
 import com.ngerasimov.rtkar.data.api.Device
 
@@ -61,25 +63,43 @@ class DeviceListAdapter(
 
     inner class DeviceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val cardView: MaterialCardView = itemView.findViewById(R.id.device_card)
+        private val iconView: ImageView = itemView.findViewById(R.id.device_icon)
         private val titleText: TextView = itemView.findViewById(R.id.device_title)
 
         fun bind(device: Device) {
             android.util.Log.d("DeviceListAdapter", "Binding device: ${device.name_by_company}, ID: ${device.id}")
+            
+            // Hide icon for settings page items (only control page uses icons)
+            iconView.visibility = View.GONE
+            
             titleText.text = device.name_by_company
             
             // Set card color based on selection state
             val isSelected = isSelected(device.id)
+            val context = itemView.context
             android.util.Log.d("DeviceListAdapter", "Device ${device.id} isSelected: $isSelected")
             if (isSelected) {
                 // Green for selected
-                cardView.setCardBackgroundColor(Color.parseColor("#E8F5E9"))
-                cardView.strokeColor = Color.parseColor("#4CAF50")
+                cardView.setCardBackgroundColor(
+                    MaterialColors.getColor(context, R.attr.cardBackgroundSelected, "cardBackgroundSelected")
+                )
+                cardView.strokeColor = MaterialColors.getColor(context, R.attr.cardStrokeSelected, "cardStrokeSelected")
                 cardView.strokeWidth = 4
+                
+                // Set content color for selected state
+                val contentColor = ResourcesCompat.getColor(context.resources, R.color.card_content_selected, null)
+                titleText.setTextColor(contentColor)
             } else {
                 // Grey for non-selected
-                cardView.setCardBackgroundColor(Color.parseColor("#F5F5F5"))
-                cardView.strokeColor = Color.parseColor("#9E9E9E")
+                cardView.setCardBackgroundColor(
+                    MaterialColors.getColor(context, R.attr.cardBackgroundInactive, "cardBackgroundInactive")
+                )
+                cardView.strokeColor = MaterialColors.getColor(context, R.attr.cardStrokeInactive, "cardStrokeInactive")
                 cardView.strokeWidth = 2
+                
+                // Set content color for inactive state
+                val contentColor = ResourcesCompat.getColor(context.resources, R.color.card_content_inactive, null)
+                titleText.setTextColor(contentColor)
             }
             
             itemView.setOnClickListener {

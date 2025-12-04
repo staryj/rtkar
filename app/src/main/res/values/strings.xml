@@ -23,6 +23,7 @@
 
     <!-- Device Card -->
     <string name="device_delete_content_description">Удалить</string>
+    <string name="device_icon_content_description">Тип устройства</string>
 
     <!-- Error Messages -->
     <string name="error_auth_token_missing">Токен аутентификации отсутствует. Пожалуйста, авторизуйтесь повторно.</string>

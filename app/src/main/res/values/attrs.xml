@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Card color attributes -->
+    <attr name="cardBackgroundActive" format="color" />
+    <attr name="cardStrokeActive" format="color" />
+    <attr name="cardBackgroundLoading" format="color" />
+    <attr name="cardStrokeLoading" format="color" />
+    <attr name="cardBackgroundInactive" format="color" />
+    <attr name="cardStrokeInactive" format="color" />
+    <attr name="cardBackgroundSelected" format="color" />
+    <attr name="cardStrokeSelected" format="color" />
+    
+    <!-- Error and action color attributes -->
+    <attr name="errorColor" format="color" />
+    <attr name="deleteButtonColor" format="color" />
+</resources>

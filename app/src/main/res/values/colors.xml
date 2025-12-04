@@ -7,4 +7,24 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    
+    <!-- Card colors -->
+    <color name="card_background_active">#FFBB86FC</color>
+    <color name="card_stroke_active">#FF6200EE</color>
+    <color name="card_background_loading">#FF03DAC5</color>
+    <color name="card_stroke_loading">#FF018786</color>
+    <color name="card_background_inactive">#FCFCFC</color>
+    <color name="card_stroke_inactive">#CECECE</color>
+    <color name="card_background_selected">#FFBB86FC</color>
+    <color name="card_stroke_selected">#FF6200EE</color>
+    
+    <!-- Card content colors (text and icon) based on state -->
+    <color name="card_content_active">#FFFFFFFF</color>
+    <color name="card_content_loading">#FFFFFFFF</color>
+    <color name="card_content_inactive">#FF000000</color>
+    <color name="card_content_selected">#FFFFFFFF</color>
+    
+    <!-- Error and action colors -->
+    <color name="error_color">#F44336</color>
+    <color name="delete_button_color">#F44336</color>
 </resources>

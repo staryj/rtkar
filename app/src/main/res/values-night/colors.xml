@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Card content colors (text and icon) for dark theme based on state -->
+    <color name="card_content_active">#FFFFFFFF</color>
+    <color name="card_content_loading">#FFFFFFFF</color>
+    <color name="card_content_inactive">#FFFFFFFF</color>
+    <color name="card_content_selected">#FFFFFFFF</color>
+</resources>

@@ -40,8 +40,6 @@ class ControlFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        val itemsPerRow = 6
-        
         // Setup single RecyclerView for all entities
         adapter = ControlEntityAdapter(
             onItemClick = { entity ->
@@ -55,11 +53,45 @@ class ControlFragment : Fragment() {
             },
             isEditingMode = false
         )
-        binding.recyclerViewControl.layoutManager = GridLayoutManager(requireContext(), itemsPerRow)
+        
+        // Set initial layout manager (will be updated dynamically)
+        binding.recyclerViewControl.layoutManager = GridLayoutManager(requireContext(), 2)
         binding.recyclerViewControl.adapter = adapter
+        
+        // Ensure items recalculate size after RecyclerView is laid out
+        binding.recyclerViewControl.viewTreeObserver.addOnGlobalLayoutListener(object : android.view.ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                binding.recyclerViewControl.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                // Trigger adapter to recalculate item sizes
+                adapter.notifyDataSetChanged()
+            }
+        })
         
         // Setup drag-and-drop
         setupItemTouchHelper()
+    }
+    
+    private fun updateGridLayout(itemCount: Int) {
+        val columns = when {
+            itemCount <= 4 -> 2
+            itemCount <= 9 -> 3
+            itemCount <= 16 -> 4
+            else -> 5
+        }
+        
+        val currentLayoutManager = binding.recyclerViewControl.layoutManager as? GridLayoutManager
+        if (currentLayoutManager?.spanCount != columns) {
+            binding.recyclerViewControl.layoutManager = GridLayoutManager(requireContext(), columns)
+            // Post to ensure layout is complete before notifying adapter to recalculate sizes
+            binding.recyclerViewControl.post {
+                adapter.notifyDataSetChanged()
+            }
+        } else {
+            // Even if columns didn't change, item count might have, so recalculate sizes
+            binding.recyclerViewControl.post {
+                adapter.notifyDataSetChanged()
+            }
+        }
     }
     
     private fun setupItemTouchHelper() {
@@ -192,6 +224,9 @@ class ControlFragment : Fragment() {
         // Observe all entities
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.allEntities.collect { entities ->
+                // Update grid layout based on item count
+                updateGridLayout(entities.size)
+                
                 // Only update adapter if we're not currently dragging
                 // This prevents conflicts during drag operations
                 if (!isDragging) {
