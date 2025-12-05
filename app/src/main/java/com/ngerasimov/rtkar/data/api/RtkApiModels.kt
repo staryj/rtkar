@@ -19,6 +19,15 @@ data class DevicesData(
 )
 
 /**
+ * Non-generic response wrapper for devices endpoints
+ * This avoids type erasure issues with Retrofit Kotlin Serialization converter
+ */
+@Serializable
+data class DevicesApiResponse(
+    val data: DevicesData
+)
+
+/**
  * Base device information
  */
 @Serializable

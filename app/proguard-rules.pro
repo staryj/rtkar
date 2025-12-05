@@ -31,12 +31,16 @@
     kotlinx.serialization.KSerializer serializer(...);
 }
 
-# Retrofit
+# Retrofit (kept for potential future use)
 -keepattributes Signature, InnerClasses, EnclosingMethod
 -keepattributes RuntimeVisibleAnnotations, RuntimeVisibleParameterAnnotations
+-keepattributes *Annotation*
 -keepclassmembers,allowshrinking,allowobfuscation interface * {
     @retrofit2.http.* <methods>;
 }
+# Preserve generic type information for API response wrapper
+-keep class com.ngerasimov.rtkar.data.api.RtkApiResponse { *; }
+-keep class com.ngerasimov.rtkar.data.api.RtkApiResponse$* { *; }
 -dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
 -dontwarn javax.annotation.**
 -dontwarn kotlin.Unit
@@ -52,6 +56,14 @@
 # Keep data classes for serialization
 -keep class com.ngerasimov.rtkar.data.** { *; }
 -keep class com.ngerasimov.rtkar.data.api.** { *; }
+# Preserve generic signatures for API response types
+-keepattributes Signature
+-keep class com.ngerasimov.rtkar.data.api.RtkApiResponse { *; }
+-keep class com.ngerasimov.rtkar.data.api.DevicesApiResponse { *; }
+-keep class com.ngerasimov.rtkar.data.api.DevicesData { *; }
+-keep class com.ngerasimov.rtkar.data.api.Device { *; }
+-keep class com.ngerasimov.rtkar.data.api.Capability { *; }
+-keep class com.ngerasimov.rtkar.data.api.InterCode { *; }
 
 # Keep API error classes
 -keep class com.ngerasimov.rtkar.data.api.ApiError { *; }
