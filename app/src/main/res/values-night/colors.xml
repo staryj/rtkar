@@ -33,4 +33,16 @@
     <color name="nav_bar_item_text_unselected">#B3FFFFFF</color>
     <color name="nav_bar_icon_selected">#FF57D9B7</color>
     <color name="nav_bar_icon_unselected">#B3FFFFFF</color>
+    
+    <!-- ============================================ -->
+    <!-- NAVIGATION DRAWER COLORS (DARK MODE) -->
+    <!-- ============================================ -->
+    <color name="nav_drawer_background">#FF1E1E1E</color>
+    <color name="nav_drawer_header_background">#FF121212</color>
+    <color name="nav_drawer_item_text_selected">#FF57D9B7</color>
+    <color name="nav_drawer_item_text_unselected">#B3FFFFFF</color>
+    <color name="nav_drawer_icon_selected">#FF57D9B7</color>
+    <color name="nav_drawer_icon_unselected">#B3FFFFFF</color>
+    <color name="nav_drawer_item_background_selected">#FF2E2E2E</color>
+    <color name="nav_drawer_item_background">@android:color/transparent</color>
 </resources>

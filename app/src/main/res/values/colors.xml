@@ -85,13 +85,25 @@
     <color name="error_color">@color/red</color>
     
     <!-- ============================================ -->
-    <!-- NAVIGATION BAR COLORS -->
+    <!-- NAVIGATION BAR COLORS (Bottom Navigation) -->
     <!-- ============================================ -->
     <color name="nav_bar_background">@color/purple_avg_1</color>
     <color name="nav_bar_item_text_selected">@color/green_light</color>
     <color name="nav_bar_item_text_unselected">@color/purple_light_1</color>
     <color name="nav_bar_icon_selected">@color/green_light</color>
     <color name="nav_bar_icon_unselected">@color/purple_light_1</color>
+    
+    <!-- ============================================ -->
+    <!-- NAVIGATION DRAWER COLORS (Left Sidebar) -->
+    <!-- ============================================ -->
+    <color name="nav_drawer_background">@color/purple_avg_1</color>
+    <color name="nav_drawer_header_background">@color/purple_dark</color>
+    <color name="nav_drawer_item_text_selected">@color/purple_light_3</color>
+    <color name="nav_drawer_item_text_unselected">@color/purple_light_1</color>
+    <color name="nav_drawer_icon_selected">@color/purple_light_3</color>
+    <color name="nav_drawer_icon_unselected">@color/purple_light_1</color>
+    <color name="nav_drawer_item_background_selected">@color/purple_avg_2</color>
+    <color name="nav_drawer_item_background">@android:color/transparent</color>
     
     <!-- ============================================ -->
     <!-- LAUNCHER COLORS -->

@@ -34,6 +34,25 @@
         <item name="errorColor">@color/error_color</item>
         <item name="deleteButtonColor">@color/delete_button_color</item>
         
+        <!-- Navigation bar colors -->
+        <item name="bottomNavigationStyle">@style/Widget.RTKar.BottomNavigationView</item>
+        <item name="navigationViewStyle">@style/Widget.RTKar.NavigationView</item>
+        
         <!-- Customize your theme here. -->
+    </style>
+    
+    <style name="Widget.RTKar.BottomNavigationView" parent="Widget.MaterialComponents.BottomNavigationView">
+        <item name="backgroundTint">@color/nav_bar_background</item>
+        <item name="itemIconTint">@color/nav_bar_icon_color_selector</item>
+        <item name="itemTextColor">@color/nav_bar_text_color_selector</item>
+        <item name="itemRippleColor">@color/nav_bar_item_text_selected</item>
+    </style>
+    
+    <!-- Navigation Drawer Style -->
+    <style name="Widget.RTKar.NavigationView" parent="Widget.MaterialComponents.NavigationView">
+        <item name="itemIconTint">@color/nav_drawer_icon_color_selector</item>
+        <item name="itemTextColor">@color/nav_drawer_text_color_selector</item>
+        <item name="itemBackground">@drawable/nav_drawer_item_background_selector</item>
+        <item name="android:background">@color/nav_drawer_background</item>
     </style>
 </resources>

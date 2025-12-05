@@ -11,8 +11,11 @@
         android:id="@+id/nav_view"
         android:layout_width="256dp"
         android:layout_height="match_parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        android:background="@color/nav_drawer_background"
+        app:itemIconTint="@color/nav_drawer_icon_color_selector"
+        app:itemTextColor="@color/nav_drawer_text_color_selector"
+        app:itemBackground="@drawable/nav_drawer_item_background_selector"
+        app:headerLayout="@layout/nav_header_main"
         app:menu="@menu/navigation_drawer" />
 
     <androidx.fragment.app.FragmentContainerView
