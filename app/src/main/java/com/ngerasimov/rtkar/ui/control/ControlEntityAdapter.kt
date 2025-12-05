@@ -193,11 +193,20 @@ class ControlEntityAdapter(
 
     class EntityDiffCallback : DiffUtil.ItemCallback<Entity>() {
         override fun areItemsTheSame(oldItem: Entity, newItem: Entity): Boolean {
+            // Use deviceId and type as unique identifier
             return oldItem.deviceId == newItem.deviceId && oldItem.type == newItem.type
         }
 
         override fun areContentsTheSame(oldItem: Entity, newItem: Entity): Boolean {
-            return oldItem == newItem
+            // Compare all fields for content equality
+            return oldItem.title == newItem.title &&
+                   oldItem.deviceId == newItem.deviceId &&
+                   oldItem.type == newItem.type
+        }
+        
+        override fun getChangePayload(oldItem: Entity, newItem: Entity): Any? {
+            // Return null to use default animation, or return payload for custom animations
+            return null
         }
     }
 }

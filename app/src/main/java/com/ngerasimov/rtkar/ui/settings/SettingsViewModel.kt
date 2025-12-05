@@ -10,6 +10,7 @@ import com.ngerasimov.rtkar.data.StorageManager
 import com.ngerasimov.rtkar.data.api.ApiError
 import com.ngerasimov.rtkar.data.api.Device
 import com.ngerasimov.rtkar.data.api.RtkApiWrapper
+import com.ngerasimov.rtkar.data.repository.DeviceRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,8 +27,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         private const val TAG = "SettingsViewModel"
     }
     
-    private val storageManager = StorageManager(application)
-    private val apiWrapper = RtkApiWrapper(application)
+    private val repository = DeviceRepository(
+        apiWrapper = RtkApiWrapper(application),
+        storageManager = StorageManager(application)
+    )
     
     private val _barrierDevices = MutableStateFlow<List<Device>>(emptyList())
     val barrierDevices: StateFlow<List<Device>> = _barrierDevices.asStateFlow()
@@ -47,14 +50,14 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     init {
         // Load selected devices
         viewModelScope.launch {
-            storageManager.entities.collect { entities ->
+            repository.entities.collect { entities ->
                 _selectedDeviceIds.value = entities.map { it.deviceId }.toSet()
             }
         }
         
         // Load devices when auth token is available
         viewModelScope.launch {
-            storageManager.authToken
+            repository.authToken
                 .onEach { token ->
                     Log.v(TAG, "Auth token flow value: ${if (token.isNullOrBlank()) "empty" else "present"}")
                 }
@@ -77,7 +80,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         try {
             // Load barriers
             Log.i(TAG, "Fetching barriers...")
-            val barrierResult = apiWrapper.getBarrierDevices(authToken)
+            val barrierResult = repository.getBarrierDevices(authToken)
             barrierResult.onSuccess { devices ->
                 Log.i(TAG, "Barriers received: ${devices.size}")
                 val filtered = filterDevices(devices, "barriers")
@@ -97,7 +100,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             
             // Load intercoms
             Log.i(TAG, "Fetching intercoms...")
-            val intercomResult = apiWrapper.getIntercomDevices(authToken)
+            val intercomResult = repository.getIntercomDevices(authToken)
             intercomResult.onSuccess { devices ->
                 Log.i(TAG, "Intercoms received: ${devices.size}")
                 val filtered = filterDevices(devices, "intercoms")
@@ -150,7 +153,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
      */
     fun toggleDeviceSelection(device: Device, type: EntityType) {
         viewModelScope.launch {
-            storageManager.toggleDeviceSelection(
+            repository.toggleDeviceSelection(
                 deviceId = device.id,
                 title = device.name_by_company,
                 type = type

@@ -17,6 +17,8 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.appcompat.app.AppCompatActivity
 import com.ngerasimov.rtkar.data.StorageManager
+import com.ngerasimov.rtkar.data.api.RtkApiWrapper
+import com.ngerasimov.rtkar.data.repository.DeviceRepository
 import com.ngerasimov.rtkar.databinding.ActivityMainBinding
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -25,7 +27,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
-    private lateinit var storageManager: StorageManager
+    private lateinit var repository: DeviceRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,7 +35,10 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         setSupportActionBar(binding.appBarMain.toolbar)
 
-        storageManager = StorageManager(this)
+        repository = DeviceRepository(
+            apiWrapper = RtkApiWrapper(this),
+            storageManager = StorageManager(this)
+        )
 
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main) as? NavHostFragment
             ?: run {
@@ -45,7 +50,7 @@ class MainActivity : AppCompatActivity() {
         // Setup navigation based on auth status
         // Check if entities exist and set start destination accordingly
         lifecycleScope.launch {
-            val authToken = storageManager.authToken.first()
+            val authToken = repository.authToken.first()
             val isAuthorized = !authToken.isNullOrBlank()
             
             // Log auth status on application startup (without exposing token)
@@ -59,7 +64,7 @@ class MainActivity : AppCompatActivity() {
 
         // Observe auth token changes to update UI
         lifecycleScope.launch {
-            storageManager.authToken.collect { authToken ->
+            repository.authToken.collect { authToken ->
                 val isAuthorized = !authToken.isNullOrBlank()
                 
                 // Update navigation configuration
@@ -221,7 +226,7 @@ class MainActivity : AppCompatActivity() {
             
             // Update overflow menu visibility based on auth status
             lifecycleScope.launch {
-                val authToken = storageManager.authToken.first()
+                val authToken = repository.authToken.first()
                 val isAuthorized = !authToken.isNullOrBlank()
                 menu.findItem(R.id.nav_settings)?.isVisible = isAuthorized
             }
@@ -259,7 +264,7 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             // Clear all stored data
             // This will trigger the auth token observer which will handle navigation
-            storageManager.clearAllData()
+            repository.clearAllData()
             
             // The observer in onCreate will automatically navigate to login
             // when it detects the auth token is cleared. We don't need to navigate manually here.

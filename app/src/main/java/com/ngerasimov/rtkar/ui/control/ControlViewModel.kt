@@ -9,6 +9,7 @@ import com.ngerasimov.rtkar.data.Entity
 import com.ngerasimov.rtkar.data.StorageManager
 import com.ngerasimov.rtkar.data.api.ApiError
 import com.ngerasimov.rtkar.data.api.RtkApiWrapper
+import com.ngerasimov.rtkar.data.repository.DeviceRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,8 +26,10 @@ class ControlViewModel(application: Application) : AndroidViewModel(application)
         private const val TAG = "ControlViewModel"
     }
     
-    private val storageManager = StorageManager(application)
-    private val apiWrapper = RtkApiWrapper(application)
+    private val repository = DeviceRepository(
+        apiWrapper = RtkApiWrapper(application),
+        storageManager = StorageManager(application)
+    )
     
     private val _allEntities = MutableStateFlow<List<Entity>>(emptyList())
     val allEntities: StateFlow<List<Entity>> = _allEntities.asStateFlow()
@@ -46,7 +49,7 @@ class ControlViewModel(application: Application) : AndroidViewModel(application)
     init {
         // Load all stored entities in a single list
         viewModelScope.launch {
-            storageManager.entities.collect { entities ->
+            repository.entities.collect { entities ->
                 _allEntities.value = entities
                 Log.i(TAG, "Entities loaded: ${entities.size} total")
             }
@@ -64,7 +67,7 @@ class ControlViewModel(application: Application) : AndroidViewModel(application)
             
             try {
                 // Get auth token
-                val authToken = storageManager.authToken.first()
+                val authToken = repository.authToken.first()
                 if (authToken.isNullOrBlank()) {
                     val errorMsg = getApplication<Application>().getString(R.string.error_auth_token_missing)
                     Log.e(TAG, "Auth token is empty, cannot open device")
@@ -75,7 +78,7 @@ class ControlViewModel(application: Application) : AndroidViewModel(application)
                 Log.i(TAG, "Opening device ${entity.deviceId} (${entity.title})")
                 
                 // Make POST request to open device
-                val result = apiWrapper.openDevice(authToken, entity.deviceId)
+                val result = repository.openDevice(authToken, entity.deviceId)
                 
                 result.onSuccess {
                     Log.i(TAG, "Successfully opened device ${entity.deviceId}")
@@ -128,7 +131,7 @@ class ControlViewModel(application: Application) : AndroidViewModel(application)
             }
             if (index >= 0) {
                 currentEntities.removeAt(index)
-                storageManager.saveEntities(currentEntities)
+                repository.saveEntities(currentEntities)
             }
         }
     }
@@ -139,7 +142,7 @@ class ControlViewModel(application: Application) : AndroidViewModel(application)
      * Note: Uses coroutine because saveEntities is a suspend function
      */
     suspend fun saveEntityOrder(entities: List<Entity>) {
-        storageManager.saveEntities(entities)
+        repository.saveEntities(entities)
     }
     
     /**
