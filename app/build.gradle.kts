@@ -70,6 +70,58 @@ tasks.configureEach {
     }
 }
 
+// Rename APK to rtkar.apk for release builds
+android.applicationVariants.all {
+    val variant = this
+    if (variant.buildType.name == "release") {
+        variant.outputs.all {
+            (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName = "rtkar.apk"
+        }
+    }
+}
+
+// Copy scripts to output directory for release builds
+afterEvaluate {
+    android.applicationVariants.all {
+        val variant = this
+        if (variant.buildType.name == "release") {
+            // Capture file paths at configuration time to avoid Task.project deprecation
+            val buildDirPath = layout.buildDirectory.get().asFile.absolutePath
+            val rootDirPath = rootProject.layout.projectDirectory.asFile.absolutePath
+            val releaseOutputDirPath = "$buildDirPath/outputs/apk/release"
+            val scriptsDirPath = "$rootDirPath/scripts"
+            
+            val copyScriptsTask = tasks.register("copyScriptsToOutput${variant.name.replaceFirstChar { it.uppercaseChar() }}") {
+                doLast {
+                    val releaseOutputDir = File(releaseOutputDirPath)
+                    val scriptsDir = File(scriptsDirPath)
+                    
+                    if (!releaseOutputDir.exists()) {
+                        releaseOutputDir.mkdirs()
+                    }
+                    
+                    if (scriptsDir.exists()) {
+                        // Copy files using Java I/O to avoid Task.project access
+                        val filesToCopy = listOf("adb", "install_on_device.sh")
+                        filesToCopy.forEach { fileName ->
+                            val sourceFile = File(scriptsDir, fileName)
+                            if (sourceFile.exists()) {
+                                val destFile = File(releaseOutputDir, fileName)
+                                sourceFile.copyTo(destFile, overwrite = true)
+                                destFile.setExecutable(true)
+                            }
+                        }
+                        println("Copied scripts to ${releaseOutputDir.absolutePath}")
+                    } else {
+                        println("Warning: Scripts directory not found at ${scriptsDir.absolutePath}")
+                    }
+                }
+            }
+            variant.assembleProvider.get().finalizedBy(copyScriptsTask)
+        }
+    }
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
