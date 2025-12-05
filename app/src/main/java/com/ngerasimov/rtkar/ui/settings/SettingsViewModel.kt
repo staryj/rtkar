@@ -6,10 +6,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ngerasimov.rtkar.R
 import com.ngerasimov.rtkar.data.EntityType
-import com.ngerasimov.rtkar.data.StorageManager
 import com.ngerasimov.rtkar.data.api.ApiError
 import com.ngerasimov.rtkar.data.api.Device
-import com.ngerasimov.rtkar.data.api.RtkApiWrapper
 import com.ngerasimov.rtkar.data.repository.DeviceRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,16 +19,14 @@ import kotlinx.coroutines.launch
  * ViewModel for the Settings screen
  * Manages device list loading, selection, and filtering
  */
-class SettingsViewModel(application: Application) : AndroidViewModel(application) {
+class SettingsViewModel(
+    application: Application,
+    private val repository: DeviceRepository
+) : AndroidViewModel(application) {
     
     companion object {
         private const val TAG = "SettingsViewModel"
     }
-    
-    private val repository = DeviceRepository(
-        apiWrapper = RtkApiWrapper(application),
-        storageManager = StorageManager(application)
-    )
     
     private val _barrierDevices = MutableStateFlow<List<Device>>(emptyList())
     val barrierDevices: StateFlow<List<Device>> = _barrierDevices.asStateFlow()

@@ -13,8 +13,11 @@ import android.webkit.WebStorage
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.ngerasimov.rtkar.data.StorageManager
+import com.ngerasimov.rtkar.data.api.RtkApiWrapper
+import com.ngerasimov.rtkar.data.repository.DeviceRepository
 import androidx.navigation.fragment.findNavController
 import com.ngerasimov.rtkar.databinding.FragmentLoginBinding
 import kotlinx.coroutines.delay
@@ -24,7 +27,7 @@ class LoginFragment : Fragment() {
 
     private var _binding: FragmentLoginBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: LoginViewModel by viewModels()
+    private lateinit var viewModel: LoginViewModel
     private var isTokenCaptured = false
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -41,6 +44,14 @@ class LoginFragment : Fragment() {
     
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        
+        // Initialize ViewModel with manual dependency injection
+        val application = requireActivity().application
+        val repository = DeviceRepository(
+            apiWrapper = RtkApiWrapper(application),
+            storageManager = StorageManager(application)
+        )
+        viewModel = LoginViewModel(application, repository)
         
         // Reset flags when view is created (handles fragment recreation/reuse after logout)
         hasCheckedAuth = false

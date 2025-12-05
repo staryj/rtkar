@@ -56,3 +56,45 @@
 # Keep API error classes
 -keep class com.ngerasimov.rtkar.data.api.ApiError { *; }
 -keep class com.ngerasimov.rtkar.data.api.ApiError$* { *; }
+
+# Hilt
+-keep class dagger.hilt.** { *; }
+-keep class javax.inject.** { *; }
+-keep class * extends dagger.hilt.android.internal.managers.ViewComponentManager$FragmentContextWrapper { *; }
+-keepclassmembers class * {
+    @dagger.hilt.android.AndroidEntryPoint <methods>;
+}
+-keepclassmembers class * {
+    @javax.inject.Inject <init>(...);
+}
+-keepclassmembers class * {
+    @dagger.hilt.android.lifecycle.HiltViewModel <init>(...);
+}
+-dontwarn dagger.hilt.**
+-dontwarn javax.inject.**
+
+# Keep Application class
+-keep class com.ngerasimov.rtkar.RTKarApplication { *; }
+-keep class com.ngerasimov.rtkar.RTKarApplication$* { *; }
+
+# Keep Hilt generated classes
+-keep class com.ngerasimov.rtkar.Hilt_* { *; }
+-keep class com.ngerasimov.rtkar.*_HiltModules { *; }
+-keep class com.ngerasimov.rtkar.*_HiltModules$* { *; }
+-keep class com.ngerasimov.rtkar.*Module { *; }
+-keep class com.ngerasimov.rtkar.*Module$* { *; }
+-keep class com.ngerasimov.rtkar.di.* { *; }
+-keep class dagger.hilt.android.internal.** { *; }
+-keep class dagger.hilt.internal.** { *; }
+-keep class dagger.hilt.codegen.** { *; }
+-keep class dagger.hilt.android.internal.managers.** { *; }
+-keep class dagger.hilt.android.internal.builders.** { *; }
+
+# Keep all Hilt generated injectors and factories
+-keep class com.ngerasimov.rtkar.*_GeneratedInjector { *; }
+-keep class com.ngerasimov.rtkar.*_MembersInjector { *; }
+-keep class com.ngerasimov.rtkar.*_Factory { *; }
+-keep class com.ngerasimov.rtkar.*_HiltModules { *; }
+
+-dontwarn com.ngerasimov.rtkar.Hilt_RTKarApplication
+-dontwarn dagger.hilt.android.internal.**

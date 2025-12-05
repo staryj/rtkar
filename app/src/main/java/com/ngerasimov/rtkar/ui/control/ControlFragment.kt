@@ -6,8 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.ngerasimov.rtkar.data.StorageManager
+import com.ngerasimov.rtkar.data.api.RtkApiWrapper
+import com.ngerasimov.rtkar.data.repository.DeviceRepository
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import com.ngerasimov.rtkar.databinding.FragmentControlBinding
@@ -18,8 +21,9 @@ class ControlFragment : Fragment() {
     private var _binding: FragmentControlBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: ControlViewModel by viewModels()
+    private lateinit var viewModel: ControlViewModel
     private lateinit var adapter: ControlEntityAdapter
+    // Lazy initialization for ItemTouchHelper - only created when needed
     private var itemTouchHelper: ItemTouchHelper? = null
     private var isDragging = false
     
@@ -40,6 +44,14 @@ class ControlFragment : Fragment() {
     ): View {
         _binding = FragmentControlBinding.inflate(inflater, container, false)
         val root: View = binding.root
+
+        // Initialize ViewModel with manual dependency injection
+        val application = requireActivity().application
+        val repository = DeviceRepository(
+            apiWrapper = RtkApiWrapper(application),
+            storageManager = StorageManager(application)
+        )
+        viewModel = ControlViewModel(application, repository)
 
         setupRecyclerView()
         observeViewModel()

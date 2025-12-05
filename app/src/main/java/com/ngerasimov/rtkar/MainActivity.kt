@@ -35,6 +35,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         setSupportActionBar(binding.appBarMain.toolbar)
 
+        // Initialize repository with manual dependency injection
         repository = DeviceRepository(
             apiWrapper = RtkApiWrapper(this),
             storageManager = StorageManager(this)

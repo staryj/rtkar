@@ -6,9 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ngerasimov.rtkar.R
 import com.ngerasimov.rtkar.data.Entity
-import com.ngerasimov.rtkar.data.StorageManager
 import com.ngerasimov.rtkar.data.api.ApiError
-import com.ngerasimov.rtkar.data.api.RtkApiWrapper
 import com.ngerasimov.rtkar.data.repository.DeviceRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,16 +18,14 @@ import kotlinx.coroutines.launch
  * ViewModel for the Control screen
  * Manages entity list, loading states, and device control actions
  */
-class ControlViewModel(application: Application) : AndroidViewModel(application) {
+class ControlViewModel(
+    application: Application,
+    private val repository: DeviceRepository
+) : AndroidViewModel(application) {
     
     companion object {
         private const val TAG = "ControlViewModel"
     }
-    
-    private val repository = DeviceRepository(
-        apiWrapper = RtkApiWrapper(application),
-        storageManager = StorageManager(application)
-    )
     
     private val _allEntities = MutableStateFlow<List<Entity>>(emptyList())
     val allEntities: StateFlow<List<Entity>> = _allEntities.asStateFlow()
@@ -38,7 +34,7 @@ class ControlViewModel(application: Application) : AndroidViewModel(application)
     private val _loadingEntityIds = MutableStateFlow<Set<String>>(emptySet())
     val loadingEntityIds: StateFlow<Set<String>> = _loadingEntityIds.asStateFlow()
     
-    // Track editing mode state
+    // Track editing mode state - lazy initialization for better performance
     private val _isEditingMode = MutableStateFlow(false)
     val isEditingMode: StateFlow<Boolean> = _isEditingMode.asStateFlow()
     

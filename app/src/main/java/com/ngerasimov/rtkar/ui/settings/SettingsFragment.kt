@@ -5,8 +5,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.ngerasimov.rtkar.data.StorageManager
+import com.ngerasimov.rtkar.data.api.RtkApiWrapper
+import com.ngerasimov.rtkar.data.repository.DeviceRepository
 import androidx.recyclerview.widget.GridLayoutManager
 import com.ngerasimov.rtkar.data.EntityType
 import com.ngerasimov.rtkar.databinding.FragmentSettingsBinding
@@ -17,7 +20,7 @@ class SettingsFragment : Fragment() {
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: SettingsViewModel by viewModels()
+    private lateinit var viewModel: SettingsViewModel
     private lateinit var barriersAdapter: DeviceListAdapter
     private lateinit var doorsAdapter: DeviceListAdapter
     
@@ -32,6 +35,14 @@ class SettingsFragment : Fragment() {
     ): View {
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
         val root: View = binding.root
+
+        // Initialize ViewModel with manual dependency injection
+        val application = requireActivity().application
+        val repository = DeviceRepository(
+            apiWrapper = RtkApiWrapper(application),
+            storageManager = StorageManager(application)
+        )
+        viewModel = SettingsViewModel(application, repository)
 
         setupRecyclerViews()
         observeViewModel()
