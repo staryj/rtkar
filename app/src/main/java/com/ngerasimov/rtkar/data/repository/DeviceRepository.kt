@@ -55,12 +55,12 @@ class DeviceRepository(
     /**
      * Get authentication token flow
      */
-    val authToken: Flow<String?> = storageManager.authToken
+    val authToken: Flow<String?> get() = storageManager.getAuthTokenFlow()
     
     /**
      * Get entities flow
      */
-    val entities: Flow<List<com.ngerasimov.rtkar.data.Entity>> = storageManager.entities
+    val entities: Flow<List<com.ngerasimov.rtkar.data.Entity>> get() = storageManager.getEntitiesFlow()
     
     /**
      * Save authentication token

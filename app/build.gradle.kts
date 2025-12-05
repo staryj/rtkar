@@ -53,6 +53,16 @@ android {
         viewBinding = true
         buildConfig = true
     }
+    
+    testOptions {
+        unitTests {
+            isReturnDefaultValues = true
+        }
+    }
+}
+
+tasks.withType<Test> {
+    jvmArgs("-Dnet.bytebuddy.experimental=true")
 }
 
 // Allow references to generated code

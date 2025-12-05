@@ -50,7 +50,7 @@ class DeviceRepositoryTest {
     fun `authToken flow delegates to storageManager`() = runTest {
         // Given
         val expectedToken = "test-token"
-        whenever(mockStorageManager.authToken).thenReturn(flowOf(expectedToken))
+        whenever(mockStorageManager.getAuthTokenFlow()).thenReturn(flowOf(expectedToken))
         
         // When
         val token = repository.authToken.first()
@@ -65,7 +65,7 @@ class DeviceRepositoryTest {
         val expectedEntities = listOf(
             Entity(EntityType.BARRIER, "Test", "device1")
         )
-        whenever(mockStorageManager.entities).thenReturn(flowOf(expectedEntities))
+        whenever(mockStorageManager.getEntitiesFlow()).thenReturn(flowOf(expectedEntities))
         
         // When
         val entities = repository.entities.first()

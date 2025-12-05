@@ -18,7 +18,7 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
  * Manages local data storage using DataStore
  * Handles authentication tokens and entity persistence
  */
-class StorageManager(private val context: Context) {
+open class StorageManager(private val context: Context) {
 
     companion object {
         private val AUTH_TOKEN_KEY = stringPreferencesKey("auth_token")
@@ -33,14 +33,19 @@ class StorageManager(private val context: Context) {
     /**
      * Get the authentication token
      */
-    val authToken: Flow<String?> = context.dataStore.data.map { preferences ->
+    open fun getAuthTokenFlow(): Flow<String?> = context.dataStore.data.map { preferences ->
         preferences[AUTH_TOKEN_KEY]
     }
+    
+    /**
+     * Get the authentication token (property for backward compatibility)
+     */
+    val authToken: Flow<String?> get() = getAuthTokenFlow()
 
     /**
      * Get the list of entities
      */
-    val entities: Flow<List<Entity>> = context.dataStore.data.map { preferences ->
+    open fun getEntitiesFlow(): Flow<List<Entity>> = context.dataStore.data.map { preferences ->
         val entitiesJson = preferences[ENTITIES_KEY]
         if (entitiesJson.isNullOrEmpty()) {
             emptyList()
@@ -53,6 +58,11 @@ class StorageManager(private val context: Context) {
             }
         }
     }
+    
+    /**
+     * Get the list of entities (property for backward compatibility)
+     */
+    val entities: Flow<List<Entity>> get() = getEntitiesFlow()
 
     /**
      * Save the authentication token
