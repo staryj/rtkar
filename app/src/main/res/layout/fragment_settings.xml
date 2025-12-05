@@ -12,6 +12,17 @@
     android:layout_height="wrap_content"
     android:padding="8dp">
 
+    <ImageView
+        android:id="@+id/barriers_icon"
+        android:layout_width="36sp"
+        android:layout_height="36sp"
+        android:src="@drawable/ic_barrier_24dp"
+        android:tint="?android:attr/textColorPrimary"
+        android:scaleType="fitCenter"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/barriers_label"
+        app:layout_constraintBottom_toBottomOf="@id/barriers_label" />
+
     <TextView
         android:id="@+id/barriers_label"
         android:layout_width="wrap_content"
@@ -19,7 +30,8 @@
         android:text="@string/settings_barriers_label"
         android:textSize="36sp"
         android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="8dp"
+        app:layout_constraintStart_toEndOf="@id/barriers_icon"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
@@ -45,15 +57,27 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/barriers_label" />
 
+    <ImageView
+        android:id="@+id/doors_icon"
+        android:layout_width="36sp"
+        android:layout_height="36sp"
+        android:src="@drawable/ic_door_24dp"
+        android:tint="?android:attr/textColorPrimary"
+        android:scaleType="fitCenter"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/doors_label"
+        app:layout_constraintBottom_toBottomOf="@id/doors_label" />
+
     <TextView
         android:id="@+id/doors_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
+        android:layout_marginStart="8dp"
         android:text="@string/settings_doors_label"
         android:textSize="36sp"
         android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/doors_icon"
         app:layout_constraintTop_toBottomOf="@id/barriers_recycler_view" />
 
     <ImageButton
