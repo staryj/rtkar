@@ -1,8 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- ============================================ -->
+    <!-- BACKGROUND COLORS (DARK MODE) -->
+    <!-- ============================================ -->
+    <color name="background_primary">#FF121212</color>
+    <color name="background_secondary">#FF1E1E1E</color>
+    
+    <!-- ============================================ -->
+    <!-- TEXT COLORS (DARK MODE) -->
+    <!-- ============================================ -->
+    <color name="text_primary">#FFFFFFFF</color>
+    <color name="text_secondary">#B3FFFFFF</color>
+    
+    <!-- ============================================ -->
+    <!-- ICON COLORS (DARK MODE) -->
+    <!-- ============================================ -->
+    <color name="icon_primary">#FFFFFFFF</color>
+    <color name="icon_secondary">#B3FFFFFF</color>
+    <color name="icon_control">#FFFFFFFF</color>
+    
     <!-- Card content colors (text and icon) for dark theme based on state -->
     <color name="card_content_active">#FFFFFFFF</color>
     <color name="card_content_loading">#FFFFFFFF</color>
     <color name="card_content_inactive">#FFFFFFFF</color>
     <color name="card_content_selected">#FFFFFFFF</color>
+    
+    <!-- ============================================ -->
+    <!-- NAVIGATION BAR COLORS (DARK MODE) -->
+    <!-- ============================================ -->
+    <color name="nav_bar_background">#FF1E1E1E</color>
+    <color name="nav_bar_item_text_selected">#FF57D9B7</color>
+    <color name="nav_bar_item_text_unselected">#B3FFFFFF</color>
+    <color name="nav_bar_icon_selected">#FF57D9B7</color>
+    <color name="nav_bar_icon_unselected">#B3FFFFFF</color>
 </resources>

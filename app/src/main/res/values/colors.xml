@@ -1,33 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
+    <!-- ============================================ -->
+    <!-- PRIMARY BRAND COLORS -->
+    <!-- ============================================ -->
+    <color name="purple_dark">#1a1125</color> <!-- Background -->
+    <color name="purple_avg_1">#30293b</color> <!-- Background light -->
+    <color name="purple_avg_2">#332a41</color> <!-- Background cards -->
+    <color name="purple_avg_3">#3c2e52</color> <!-- Background buttons -->
+    <color name="purple_light_1">#8b63fe</color> <!-- Actions -->
+    <color name="purple_light_2">#7b6f98</color> <!-- Inactive -->
+    <color name="purple_light_3">#e6d9f5</color> <!-- Titles -->
+    <color name="green_dark">#2e5956</color> <!-- Active card background -->
+    <color name="green_light">#57d9b7</color> <!-- Active action -->
+    
+    <!-- ============================================ -->
+    <!-- BASIC COLORS -->
+    <!-- ============================================ -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="red">#F44336</color>
+
+    <!-- ============================================ -->
+    <!-- BACKGROUND COLORS -->
+    <!-- ============================================ -->
+    <color name="background_primary">@color/purple_dark</color>
+    <color name="background_secondary">@color/purple_avg_1</color>
     
-    <!-- Card colors -->
-    <color name="card_background_active">#FFBB86FC</color>
-    <color name="card_stroke_active">#FF6200EE</color>
-    <color name="card_background_loading">#FF03DAC5</color>
-    <color name="card_stroke_loading">#FF018786</color>
-    <color name="card_background_inactive">#FCFCFC</color>
-    <color name="card_stroke_inactive">#CECECE</color>
-    <color name="card_background_selected">#FFBB86FC</color>
-    <color name="card_stroke_selected">#FF6200EE</color>
+    <!-- ============================================ -->
+    <!-- HEADER/TOOLBAR COLORS -->
+    <!-- ============================================ -->
+    <color name="header_background">@color/purple_avg_1</color>
+    <color name="header_text">@color/purple_light_3</color>
+    <color name="status_bar">@color/purple_avg_1</color>
+    
+    <!-- ============================================ -->
+    <!-- TEXT COLORS -->
+    <!-- ============================================ -->
+    <color name="text_primary">@color/purple_light_1</color>
+    <color name="text_secondary">@color/purple_light_1</color>
+    <color name="text_on_primary">@color/purple_light_2</color>
+    <color name="text_on_secondary">@color/purple_light_2</color>
+    
+    <!-- ============================================ -->
+    <!-- CARD COLORS -->
+    <!-- ============================================ -->
+    <color name="card_background_active">@color/purple_avg_2</color>
+    <color name="card_stroke_active">@color/purple_dark</color>
+    <color name="card_background_loading">@color/green_dark</color>
+    <color name="card_stroke_loading">@color/purple_dark</color>
+    <color name="card_background_inactive">@color/purple_light_2</color>
+    <color name="card_stroke_inactive">@color/purple_dark</color>
+    <color name="card_background_selected">@color/green_dark</color>
+    <color name="card_stroke_selected">@color/purple_dark</color>
     
     <!-- Card content colors (text and icon) based on state -->
-    <color name="card_content_active">#FFFFFFFF</color>
-    <color name="card_content_loading">#FFFFFFFF</color>
-    <color name="card_content_inactive">#FF000000</color>
-    <color name="card_content_selected">#FFFFFFFF</color>
+    <color name="card_content_active">@color/purple_light_3</color>
+    <color name="card_content_loading">@color/green_light</color>
+    <color name="card_content_inactive">@color/purple_light_3</color>
+    <color name="card_content_selected">@color/purple_light_3</color>
     
-    <!-- Error and action colors -->
-    <color name="error_color">#F44336</color>
-    <color name="delete_button_color">#F44336</color>
+    <!-- ============================================ -->
+    <!-- BUTTON COLORS -->
+    <!-- ============================================ -->
+    <color name="button_primary">@color/purple_avg_3</color>
+    <color name="button_primary_text">@color/purple_light_1</color>
+    <color name="button_secondary">@color/purple_avg_3</color>
+    <color name="button_secondary_text">@color/purple_light_1</color>
+    <color name="delete_button_color">@color/red</color>
+    <color name="delete_button_text">@color/white</color>
+    <color name="reload_button_loading">@color/green_light</color>
+    <color name="icon_button_tint">@color/white</color>
     
-    <!-- Loading color for reload buttons -->
-    <color name="reload_button_loading">#FF018786</color>
+    <!-- ============================================ -->
+    <!-- ICON COLORS -->
+    <!-- ============================================ -->
+    <color name="icon_primary">@color/purple_light_1</color>
+    <color name="icon_secondary">@color/purple_light_1</color>
+    <color name="icon_on_primary">@color/green_light</color>
+    <color name="icon_control">@color/green_light</color>
+    
+    <!-- ============================================ -->
+    <!-- ERROR AND ACTION COLORS -->
+    <!-- ============================================ -->
+    <color name="error_color">@color/red</color>
+    
+    <!-- ============================================ -->
+    <!-- NAVIGATION BAR COLORS -->
+    <!-- ============================================ -->
+    <color name="nav_bar_background">@color/purple_avg_1</color>
+    <color name="nav_bar_item_text_selected">@color/green_light</color>
+    <color name="nav_bar_item_text_unselected">@color/purple_light_1</color>
+    <color name="nav_bar_icon_selected">@color/green_light</color>
+    <color name="nav_bar_icon_unselected">@color/purple_light_1</color>
+    
+    <!-- ============================================ -->
+    <!-- LAUNCHER COLORS -->
+    <!-- ============================================ -->
+    <color name="launcher_background">@color/purple_dark</color>
 </resources>

@@ -51,7 +51,7 @@
             android:padding="6dp"
             android:src="@drawable/ic_close_black_24dp"
             android:visibility="gone"
-            app:tint="@android:color/white" />
+            app:tint="@color/icon_button_tint" />
 
     </FrameLayout>
 
