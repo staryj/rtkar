@@ -1,12 +1,15 @@
 package com.ngerasimov.rtkar.ui.settings
 
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.ngerasimov.rtkar.R
 import com.ngerasimov.rtkar.data.StorageManager
 import com.ngerasimov.rtkar.data.api.RtkApiWrapper
 import com.ngerasimov.rtkar.data.repository.DeviceRepository
@@ -45,6 +48,7 @@ class SettingsFragment : Fragment() {
         viewModel = SettingsViewModel(application, repository)
 
         setupRecyclerViews()
+        setupReloadButtons()
         observeViewModel()
 
         return root
@@ -74,6 +78,16 @@ class SettingsFragment : Fragment() {
         )
         binding.doorsRecyclerView.layoutManager = GridLayoutManager(requireContext(), GRID_ITEMS_PER_ROW)
         binding.doorsRecyclerView.adapter = doorsAdapter
+    }
+
+    private fun setupReloadButtons() {
+        binding.barriersReloadButton.setOnClickListener {
+            viewModel.reloadBarriers()
+        }
+        
+        binding.doorsReloadButton.setOnClickListener {
+            viewModel.reloadIntercoms()
+        }
     }
 
     private fun observeViewModel() {
@@ -122,6 +136,33 @@ class SettingsFragment : Fragment() {
                 }
             }
         }
+
+        // Observe barriers loading state
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.isLoadingBarriers.collect { isLoading ->
+                updateReloadButtonState(binding.barriersReloadButton, isLoading)
+            }
+        }
+
+        // Observe intercoms loading state
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.isLoadingIntercoms.collect { isLoading ->
+                updateReloadButtonState(binding.doorsReloadButton, isLoading)
+            }
+        }
+    }
+
+    private fun updateReloadButtonState(button: android.widget.ImageButton, isLoading: Boolean) {
+        button.isEnabled = !isLoading
+        button.isClickable = !isLoading
+        val tintColor = if (isLoading) {
+            ContextCompat.getColor(requireContext(), R.color.reload_button_loading)
+        } else {
+            val typedValue = TypedValue()
+            requireContext().theme.resolveAttribute(android.R.attr.colorControlNormal, typedValue, true)
+            ContextCompat.getColor(requireContext(), typedValue.resourceId)
+        }
+        button.imageTintList = android.content.res.ColorStateList.valueOf(tintColor)
     }
 
     override fun onDestroyView() {

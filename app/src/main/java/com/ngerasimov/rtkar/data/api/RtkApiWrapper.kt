@@ -29,6 +29,7 @@ private val Context.apiDataStore: DataStore<Preferences> by preferencesDataStore
 class RtkApiWrapper(private val context: Context) {
     
     companion object {
+        private const val TAG = "RtkApiWrapper"
         private const val BASE_URL = com.ngerasimov.rtkar.BuildConfig.API_BASE_URL
         private const val REFERER_URL = com.ngerasimov.rtkar.BuildConfig.API_REFERER_URL
         private const val CACHE_LIFETIME_MS = 24 * 60 * 60 * 1000L // 1 day in milliseconds
@@ -93,11 +94,17 @@ class RtkApiWrapper(private val context: Context) {
             if (!forceReload) {
                 val cachedData = getCachedBarrierDevices()
                 if (cachedData != null) {
+                    android.util.Log.i(TAG, "Barrier devices loaded from CACHE (${cachedData.size} devices)")
                     return Result.success(cachedData)
+                } else {
+                    android.util.Log.i(TAG, "No valid cache found for barrier devices, fetching from REMOTE SERVER")
                 }
+            } else {
+                android.util.Log.i(TAG, "Force reload requested, fetching barrier devices from REMOTE SERVER")
             }
             
             // Fetch from API
+            android.util.Log.d(TAG, "Fetching barrier devices from remote server...")
             val response = apiService.getBarrierDevices(
                 authorization = authToken,
                 accept = "application/json",
@@ -105,18 +112,22 @@ class RtkApiWrapper(private val context: Context) {
             )
             
             val devices = response.data.devices
+            android.util.Log.i(TAG, "Barrier devices loaded from REMOTE SERVER (${devices.size} devices)")
             
             // Cache the result
             cacheBarrierDevices(devices)
+            android.util.Log.d(TAG, "Barrier devices cached successfully")
             
             Result.success(devices)
         } catch (e: Exception) {
-            android.util.Log.e("RtkApiWrapper", "Failed to fetch barrier devices", e)
+            android.util.Log.e(TAG, "Failed to fetch barrier devices from remote server", e)
             // If API call fails, try to return cached data
             val cachedData = getCachedBarrierDevices()
             if (cachedData != null) {
+                android.util.Log.i(TAG, "API call failed, falling back to CACHE (${cachedData.size} devices)")
                 Result.success(cachedData)
             } else {
+                android.util.Log.e(TAG, "No cache available and API call failed")
                 Result.failure(e.toApiError())
             }
         }
@@ -137,11 +148,17 @@ class RtkApiWrapper(private val context: Context) {
             if (!forceReload) {
                 val cachedData = getCachedIntercomDevices()
                 if (cachedData != null) {
+                    android.util.Log.i(TAG, "Intercom devices loaded from CACHE (${cachedData.size} devices)")
                     return Result.success(cachedData)
+                } else {
+                    android.util.Log.i(TAG, "No valid cache found for intercom devices, fetching from REMOTE SERVER")
                 }
+            } else {
+                android.util.Log.i(TAG, "Force reload requested, fetching intercom devices from REMOTE SERVER")
             }
             
             // Fetch from API
+            android.util.Log.d(TAG, "Fetching intercom devices from remote server...")
             val response = apiService.getIntercomDevices(
                 authorization = authToken,
                 accept = "application/json",
@@ -149,18 +166,22 @@ class RtkApiWrapper(private val context: Context) {
             )
             
             val devices = response.data.devices
+            android.util.Log.i(TAG, "Intercom devices loaded from REMOTE SERVER (${devices.size} devices)")
             
             // Cache the result
             cacheIntercomDevices(devices)
+            android.util.Log.d(TAG, "Intercom devices cached successfully")
             
             Result.success(devices)
         } catch (e: Exception) {
-            android.util.Log.e("RtkApiWrapper", "Failed to fetch intercom devices", e)
+            android.util.Log.e(TAG, "Failed to fetch intercom devices from remote server", e)
             // If API call fails, try to return cached data
             val cachedData = getCachedIntercomDevices()
             if (cachedData != null) {
+                android.util.Log.i(TAG, "API call failed, falling back to CACHE (${cachedData.size} devices)")
                 Result.success(cachedData)
             } else {
+                android.util.Log.e(TAG, "No cache available and API call failed")
                 Result.failure(e.toApiError())
             }
         }
@@ -204,19 +225,29 @@ class RtkApiWrapper(private val context: Context) {
      */
     private suspend fun getCachedBarrierDevices(): List<Device>? {
         val preferences = context.apiDataStore.data.first()
-        val cachedJson = preferences[BARRIER_DEVICES_KEY] ?: return null
-        val timestamp = preferences[BARRIER_CACHE_TIMESTAMP_KEY] ?: return null
+        val cachedJson = preferences[BARRIER_DEVICES_KEY] ?: run {
+            android.util.Log.d(TAG, "No barrier devices cache found")
+            return null
+        }
+        val timestamp = preferences[BARRIER_CACHE_TIMESTAMP_KEY] ?: run {
+            android.util.Log.d(TAG, "No barrier devices cache timestamp found")
+            return null
+        }
         
         // Check if cache is still valid (within 1 day)
         val currentTime = System.currentTimeMillis()
-        if (currentTime - timestamp > CACHE_LIFETIME_MS) {
+        val cacheAge = currentTime - timestamp
+        if (cacheAge > CACHE_LIFETIME_MS) {
+            android.util.Log.d(TAG, "Barrier devices cache expired (age: ${cacheAge / 1000 / 60} minutes, max: ${CACHE_LIFETIME_MS / 1000 / 60} minutes)")
             return null // Cache expired
         }
         
         return try {
-            json.decodeFromString(ListSerializer(Device.serializer()), cachedJson)
+            val devices = json.decodeFromString(ListSerializer(Device.serializer()), cachedJson)
+            android.util.Log.d(TAG, "Barrier devices cache is valid (age: ${cacheAge / 1000 / 60} minutes)")
+            devices
         } catch (e: Exception) {
-            android.util.Log.e("RtkApiWrapper", "Failed to deserialize cached barrier devices", e)
+            android.util.Log.e(TAG, "Failed to deserialize cached barrier devices", e)
             null
         }
     }
@@ -226,19 +257,29 @@ class RtkApiWrapper(private val context: Context) {
      */
     private suspend fun getCachedIntercomDevices(): List<Device>? {
         val preferences = context.apiDataStore.data.first()
-        val cachedJson = preferences[INTERCOM_DEVICES_KEY] ?: return null
-        val timestamp = preferences[INTERCOM_CACHE_TIMESTAMP_KEY] ?: return null
+        val cachedJson = preferences[INTERCOM_DEVICES_KEY] ?: run {
+            android.util.Log.d(TAG, "No intercom devices cache found")
+            return null
+        }
+        val timestamp = preferences[INTERCOM_CACHE_TIMESTAMP_KEY] ?: run {
+            android.util.Log.d(TAG, "No intercom devices cache timestamp found")
+            return null
+        }
         
         // Check if cache is still valid (within 1 day)
         val currentTime = System.currentTimeMillis()
-        if (currentTime - timestamp > CACHE_LIFETIME_MS) {
+        val cacheAge = currentTime - timestamp
+        if (cacheAge > CACHE_LIFETIME_MS) {
+            android.util.Log.d(TAG, "Intercom devices cache expired (age: ${cacheAge / 1000 / 60} minutes, max: ${CACHE_LIFETIME_MS / 1000 / 60} minutes)")
             return null // Cache expired
         }
         
         return try {
-            json.decodeFromString(ListSerializer(Device.serializer()), cachedJson)
+            val devices = json.decodeFromString(ListSerializer(Device.serializer()), cachedJson)
+            android.util.Log.d(TAG, "Intercom devices cache is valid (age: ${cacheAge / 1000 / 60} minutes)")
+            devices
         } catch (e: Exception) {
-            android.util.Log.e("RtkApiWrapper", "Failed to deserialize cached intercom devices", e)
+            android.util.Log.e(TAG, "Failed to deserialize cached intercom devices", e)
             null
         }
     }
@@ -251,6 +292,7 @@ class RtkApiWrapper(private val context: Context) {
             val devicesJson = json.encodeToString(ListSerializer(Device.serializer()), devices)
             preferences[BARRIER_DEVICES_KEY] = devicesJson
             preferences[BARRIER_CACHE_TIMESTAMP_KEY] = System.currentTimeMillis()
+            android.util.Log.d(TAG, "Barrier devices cached (${devices.size} devices)")
         }
     }
     
@@ -262,6 +304,7 @@ class RtkApiWrapper(private val context: Context) {
             val devicesJson = json.encodeToString(ListSerializer(Device.serializer()), devices)
             preferences[INTERCOM_DEVICES_KEY] = devicesJson
             preferences[INTERCOM_CACHE_TIMESTAMP_KEY] = System.currentTimeMillis()
+            android.util.Log.d(TAG, "Intercom devices cached (${devices.size} devices)")
         }
     }
 }

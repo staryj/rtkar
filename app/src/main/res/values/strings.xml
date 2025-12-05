@@ -20,6 +20,7 @@
     <string name="settings_doors_label">Двери</string>
     <string name="settings_barriers_empty">Нет доступных шлагбаумов</string>
     <string name="settings_doors_empty">Нет доступных дверей</string>
+    <string name="settings_reload_content_description">Обновить</string>
 
     <!-- Device Card -->
     <string name="device_delete_content_description">Удалить</string>

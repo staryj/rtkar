@@ -12,6 +12,7 @@ import com.ngerasimov.rtkar.data.repository.DeviceRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
@@ -36,6 +37,12 @@ class SettingsViewModel(
     
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+    
+    private val _isLoadingBarriers = MutableStateFlow(false)
+    val isLoadingBarriers: StateFlow<Boolean> = _isLoadingBarriers.asStateFlow()
+    
+    private val _isLoadingIntercoms = MutableStateFlow(false)
+    val isLoadingIntercoms: StateFlow<Boolean> = _isLoadingIntercoms.asStateFlow()
     
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
@@ -162,5 +169,91 @@ class SettingsViewModel(
      */
     fun isDeviceSelected(deviceId: String): Boolean {
         return _selectedDeviceIds.value.contains(deviceId)
+    }
+    
+    /**
+     * Force reload barriers (clear cache and reload)
+     */
+    fun reloadBarriers() {
+        viewModelScope.launch {
+            val token = repository.authToken.first()
+            if (!token.isNullOrBlank()) {
+                _isLoadingBarriers.value = true
+                _error.value = null
+                
+                try {
+                    val barrierResult = repository.getBarrierDevices(token, forceReload = true)
+                    barrierResult.onSuccess { devices ->
+                        val filtered = filterDevices(devices, "barriers")
+                        _barrierDevices.value = filtered
+                    }.onFailure { exception ->
+                        Log.e(TAG, "Failed to reload barriers", exception)
+                        val errorMsg = when (exception) {
+                            is ApiError -> exception.getUserMessage(getApplication())
+                            else -> getApplication<Application>().getString(
+                                R.string.error_failed_to_load_barriers,
+                                exception.message ?: ""
+                            )
+                        }
+                        _error.value = errorMsg
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error reloading barriers", e)
+                    val errorMsg = when (e) {
+                        is ApiError -> e.getUserMessage(getApplication())
+                        else -> getApplication<Application>().getString(
+                            R.string.error_failed_to_load_barriers,
+                            e.message ?: ""
+                        )
+                    }
+                    _error.value = errorMsg
+                } finally {
+                    _isLoadingBarriers.value = false
+                }
+            }
+        }
+    }
+    
+    /**
+     * Force reload intercoms (clear cache and reload)
+     */
+    fun reloadIntercoms() {
+        viewModelScope.launch {
+            val token = repository.authToken.first()
+            if (!token.isNullOrBlank()) {
+                _isLoadingIntercoms.value = true
+                _error.value = null
+                
+                try {
+                    val intercomResult = repository.getIntercomDevices(token, forceReload = true)
+                    intercomResult.onSuccess { devices ->
+                        val filtered = filterDevices(devices, "intercoms")
+                        _intercomDevices.value = filtered
+                    }.onFailure { exception ->
+                        Log.e(TAG, "Failed to reload intercoms", exception)
+                        val errorMsg = when (exception) {
+                            is ApiError -> exception.getUserMessage(getApplication())
+                            else -> getApplication<Application>().getString(
+                                R.string.error_failed_to_load_intercoms,
+                                exception.message ?: ""
+                            )
+                        }
+                        _error.value = errorMsg
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error reloading intercoms", e)
+                    val errorMsg = when (e) {
+                        is ApiError -> e.getUserMessage(getApplication())
+                        else -> getApplication<Application>().getString(
+                            R.string.error_failed_to_load_intercoms,
+                            e.message ?: ""
+                        )
+                    }
+                    _error.value = errorMsg
+                } finally {
+                    _isLoadingIntercoms.value = false
+                }
+            }
+        }
     }
 }

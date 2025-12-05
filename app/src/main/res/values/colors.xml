@@ -27,4 +27,7 @@
     <!-- Error and action colors -->
     <color name="error_color">#F44336</color>
     <color name="delete_button_color">#F44336</color>
+    
+    <!-- Loading color for reload buttons -->
+    <color name="reload_button_loading">#FF018786</color>
 </resources>

@@ -57,7 +57,6 @@ class DeviceListAdapter(
     
     override fun getItemCount(): Int {
         val count = super.getItemCount()
-        android.util.Log.d("DeviceListAdapter", "getItemCount: $count")
         return count
     }
 
