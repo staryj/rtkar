@@ -18,6 +18,11 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        
+        // BuildConfig fields
+        buildConfigField("String", "API_BASE_URL", "\"https://household.key.rt.ru/\"")
+        buildConfigField("String", "API_REFERER_URL", "\"https://key.rt.ru/\"")
+        buildConfigField("String", "LOGIN_URL", "\"https://key.rt.ru/main/pwa/dashboard\"")
     }
 
     buildTypes {
@@ -39,6 +44,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 }
 

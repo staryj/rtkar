@@ -15,6 +15,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel for the Control screen
+ * Manages entity list, loading states, and device control actions
+ */
 class ControlViewModel(application: Application) : AndroidViewModel(application) {
     
     companion object {
@@ -44,7 +48,7 @@ class ControlViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             storageManager.entities.collect { entities ->
                 _allEntities.value = entities
-                Log.d(TAG, "Entities loaded: ${entities.size} total")
+                Log.i(TAG, "Entities loaded: ${entities.size} total")
             }
         }
     }
@@ -68,13 +72,13 @@ class ControlViewModel(application: Application) : AndroidViewModel(application)
                     return@launch
                 }
                 
-                Log.d(TAG, "Opening device ${entity.deviceId} (${entity.title})")
+                Log.i(TAG, "Opening device ${entity.deviceId} (${entity.title})")
                 
                 // Make POST request to open device
                 val result = apiWrapper.openDevice(authToken, entity.deviceId)
                 
                 result.onSuccess {
-                    Log.d(TAG, "Successfully opened device ${entity.deviceId}")
+                    Log.i(TAG, "Successfully opened device ${entity.deviceId}")
                     // Clear any previous error
                     _errorMessage.value = null
                 }.onFailure { exception ->
@@ -132,11 +136,10 @@ class ControlViewModel(application: Application) : AndroidViewModel(application)
     /**
      * Save the entity order from the provided list
      * Used after drag-and-drop operations complete
+     * Note: Uses coroutine because saveEntities is a suspend function
      */
-    fun saveEntityOrder(entities: List<Entity>) {
-        viewModelScope.launch {
-            storageManager.saveEntities(entities)
-        }
+    suspend fun saveEntityOrder(entities: List<Entity>) {
+        storageManager.saveEntities(entities)
     }
     
     /**

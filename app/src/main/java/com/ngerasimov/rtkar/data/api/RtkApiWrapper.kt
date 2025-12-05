@@ -23,11 +23,14 @@ private val Context.apiDataStore: DataStore<Preferences> by preferencesDataStore
 
 /**
  * Wrapper class for RTK API services with caching support
+ * Provides methods to interact with RTK API endpoints with automatic caching
+ * and error handling
  */
 class RtkApiWrapper(private val context: Context) {
     
     companion object {
-        private const val BASE_URL = "https://household.key.rt.ru/"
+        private const val BASE_URL = com.ngerasimov.rtkar.BuildConfig.API_BASE_URL
+        private const val REFERER_URL = com.ngerasimov.rtkar.BuildConfig.API_REFERER_URL
         private const val CACHE_LIFETIME_MS = 24 * 60 * 60 * 1000L // 1 day in milliseconds
         private const val HTTP_TIMEOUT_SECONDS = 30L
         private const val HTTP_UNAUTHORIZED = 401
@@ -98,7 +101,7 @@ class RtkApiWrapper(private val context: Context) {
             val response = apiService.getBarrierDevices(
                 authorization = authToken,
                 accept = "application/json",
-                referer = "https://key.rt.ru/"
+                referer = REFERER_URL
             )
             
             val devices = response.data.devices
@@ -142,7 +145,7 @@ class RtkApiWrapper(private val context: Context) {
             val response = apiService.getIntercomDevices(
                 authorization = authToken,
                 accept = "application/json",
-                referer = "https://key.rt.ru/"
+                referer = REFERER_URL
             )
             
             val devices = response.data.devices
@@ -178,7 +181,7 @@ class RtkApiWrapper(private val context: Context) {
                 id = deviceId,
                 authorization = authToken,
                 accept = "application/json",
-                referer = "https://key.rt.ru/"
+                referer = REFERER_URL
             )
             
             if (response.isSuccessful) {

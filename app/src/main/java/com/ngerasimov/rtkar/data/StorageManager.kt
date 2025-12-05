@@ -14,6 +14,10 @@ import kotlinx.serialization.json.Json
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "app_storage")
 
+/**
+ * Manages local data storage using DataStore
+ * Handles authentication tokens and entity persistence
+ */
 class StorageManager(private val context: Context) {
 
     companion object {

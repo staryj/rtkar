@@ -26,8 +26,6 @@ class LoginFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: LoginViewModel by viewModels()
     private var isTokenCaptured = false
-    private var navigationRetryCount = 0
-    private val maxNavigationRetries = 3
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreateView(
@@ -226,8 +224,9 @@ class LoginFragment : Fragment() {
         }
 
         // Load the login URL
-        webView.loadUrl("https://key.rt.ru/main/pwa/dashboard")
-        Log.d("LoginFragment", "WebView URL loaded: https://key.rt.ru/main/pwa/dashboard")
+        val loginUrl = com.ngerasimov.rtkar.BuildConfig.LOGIN_URL
+        webView.loadUrl(loginUrl)
+        Log.d("LoginFragment", "WebView URL loaded: $loginUrl")
     }
 
     private fun injectInterceptionScript(webView: WebView?) {
@@ -302,82 +301,19 @@ class LoginFragment : Fragment() {
     }
 
     private fun navigateToSettings() {
-        if (!isAdded || view == null) {
-            Log.w("LoginFragment", "Fragment not attached, cannot navigate")
-            return
-        }
-        
-        try {
-            val navController = findNavController()
-            // Don't use popUpTo with inclusive=true on start destination
-            // Just navigate normally
-            navController.navigate(com.ngerasimov.rtkar.R.id.nav_settings)
-            Log.d("LoginFragment", "Successfully navigated to Settings")
-            navigationRetryCount = 0 // Reset on success
-        } catch (e: Exception) {
-            Log.e("LoginFragment", "Failed to navigate to settings: ${e.message}", e)
-            navigationRetryCount++
-            if (navigationRetryCount < maxNavigationRetries) {
-                // Retry after a delay
-                view?.postDelayed({
-                    if (isAdded) {
-                        navigateToSettings()
-                    }
-                }, 300)
-            } else {
-                Log.e("LoginFragment", "Max retries reached, navigation failed")
-                navigationRetryCount = 0
-            }
-        }
+        NavigationHelper.navigateWithRetry(
+            fragment = this,
+            destinationId = com.ngerasimov.rtkar.R.id.nav_settings,
+            verifyGraph = false
+        )
     }
     
     private fun navigateToControl() {
-        if (!isAdded || view == null) {
-            Log.w("LoginFragment", "Fragment not attached, cannot navigate")
-            return
-        }
-        
-        if (navigationRetryCount >= maxNavigationRetries) {
-            Log.e("LoginFragment", "Max navigation retries reached, giving up")
-            navigationRetryCount = 0
-            return
-        }
-        
-        try {
-            val navController = findNavController()
-            // Check if graph is ready and has the destination
-            val graph = navController.graph
-            val controlNode = graph.findNode(com.ngerasimov.rtkar.R.id.nav_control)
-            
-            if (controlNode == null) {
-                Log.w("LoginFragment", "Control destination not found in navigation graph, retrying... (attempt ${navigationRetryCount + 1})")
-                navigationRetryCount++
-                // Retry after a short delay
-                view?.postDelayed({
-                    if (isAdded) {
-                        navigateToControl()
-                    }
-                }, 200)
-                return
-            }
-            
-            // Navigate without popUpTo - just simple navigation
-            navController.navigate(com.ngerasimov.rtkar.R.id.nav_control)
-            Log.d("LoginFragment", "Successfully navigated to Control")
-            navigationRetryCount = 0 // Reset on success
-        } catch (e: Exception) {
-            Log.e("LoginFragment", "Failed to navigate to control: ${e.message}", e)
-            navigationRetryCount++
-            if (navigationRetryCount < maxNavigationRetries) {
-                // Retry after a longer delay
-                view?.postDelayed({
-                    navigateToControl()
-                }, 300)
-            } else {
-                Log.e("LoginFragment", "Max retries reached, navigation failed")
-                navigationRetryCount = 0
-            }
-        }
+        NavigationHelper.navigateWithRetry(
+            fragment = this,
+            destinationId = com.ngerasimov.rtkar.R.id.nav_control,
+            verifyGraph = true
+        )
     }
 
     inner class WebAppInterface {

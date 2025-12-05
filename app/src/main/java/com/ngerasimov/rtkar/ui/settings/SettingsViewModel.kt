@@ -16,6 +16,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel for the Settings screen
+ * Manages device list loading, selection, and filtering
+ */
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
     
     companion object {
@@ -52,33 +56,33 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch {
             storageManager.authToken
                 .onEach { token ->
-                    Log.d(TAG, "Auth token flow value: ${if (token.isNullOrBlank()) "empty" else "present"}")
+                    Log.v(TAG, "Auth token flow value: ${if (token.isNullOrBlank()) "empty" else "present"}")
                 }
                 .collect { token ->
                     if (!token.isNullOrBlank()) {
-                        Log.d(TAG, "Loading devices with token")
+                        Log.i(TAG, "Loading devices with token")
                         loadDevices(token)
                     } else {
-                        Log.d(TAG, "Auth token is empty, cannot load devices")
+                        Log.w(TAG, "Auth token is empty, cannot load devices")
                     }
                 }
         }
     }
     
     private suspend fun loadDevices(authToken: String) {
-        Log.d(TAG, "Loading devices with auth token")
+        Log.i(TAG, "Loading devices with auth token")
         _isLoading.value = true
         _error.value = null
         
         try {
             // Load barriers
-            Log.d(TAG, "Fetching barriers...")
+            Log.i(TAG, "Fetching barriers...")
             val barrierResult = apiWrapper.getBarrierDevices(authToken)
             barrierResult.onSuccess { devices ->
-                Log.d(TAG, "Barriers received: ${devices.size}")
+                Log.i(TAG, "Barriers received: ${devices.size}")
                 val filtered = filterDevices(devices, "barriers")
                 _barrierDevices.value = filtered
-                Log.d(TAG, "Barriers available for display: ${filtered.size}")
+                Log.i(TAG, "Barriers available for display: ${filtered.size}")
             }.onFailure { exception ->
                 Log.e(TAG, "Failed to load barriers", exception)
                 val errorMsg = when (exception) {
@@ -92,13 +96,13 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             }
             
             // Load intercoms
-            Log.d(TAG, "Fetching intercoms...")
+            Log.i(TAG, "Fetching intercoms...")
             val intercomResult = apiWrapper.getIntercomDevices(authToken)
             intercomResult.onSuccess { devices ->
-                Log.d(TAG, "Intercoms received: ${devices.size}")
+                Log.i(TAG, "Intercoms received: ${devices.size}")
                 val filtered = filterDevices(devices, "intercoms")
                 _intercomDevices.value = filtered
-                Log.d(TAG, "Intercoms available for display: ${filtered.size}")
+                Log.i(TAG, "Intercoms available for display: ${filtered.size}")
             }.onFailure { exception ->
                 Log.e(TAG, "Failed to load intercoms", exception)
                 val errorMsg = when (exception) {
@@ -122,7 +126,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             _error.value = errorMsg
         } finally {
             _isLoading.value = false
-            Log.d(TAG, "Loading completed. Barriers: ${_barrierDevices.value.size}, Intercoms: ${_intercomDevices.value.size}")
+            Log.i(TAG, "Loading completed. Barriers: ${_barrierDevices.value.size}, Intercoms: ${_intercomDevices.value.size}")
         }
     }
     
@@ -136,12 +140,13 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 capability.name == "open_door" && capability.setup
             }
         }
-        Log.d(TAG, "$deviceType: Total received: $totalCount, Filtered (active with open_door): ${filtered.size}")
+        Log.v(TAG, "$deviceType: Total received: $totalCount, Filtered (active with open_door): ${filtered.size}")
         return filtered
     }
     
     /**
      * Toggle device selection
+     * Note: Uses coroutine because toggleDeviceSelection is a suspend function
      */
     fun toggleDeviceSelection(device: Device, type: EntityType) {
         viewModelScope.launch {

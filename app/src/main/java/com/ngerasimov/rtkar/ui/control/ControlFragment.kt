@@ -205,7 +205,9 @@ class ControlFragment : Fragment() {
                             // Save the current order from adapter to ViewModel
                             val currentList = adapter.currentList
                             if (currentList.isNotEmpty()) {
-                                viewModel.saveEntityOrder(currentList)
+                                viewLifecycleOwner.lifecycleScope.launch {
+                                    viewModel.saveEntityOrder(currentList)
+                                }
                             }
                         }
                         viewHolder?.itemView?.alpha = 1.0f
