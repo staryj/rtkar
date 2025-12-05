@@ -1,11 +1,9 @@
 package com.ngerasimov.rtkar.data.repository
 
-import com.ngerasimov.rtkar.data.api.ApiError
 import com.ngerasimov.rtkar.data.api.Device
 import com.ngerasimov.rtkar.data.api.RtkApiWrapper
 import com.ngerasimov.rtkar.data.StorageManager
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 
 /**
  * Repository for managing device data

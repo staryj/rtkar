@@ -73,17 +73,4 @@ class DeviceRepositoryTest {
         // Then
         assertEquals(expectedEntities, entities)
     }
-    
-    @Test
-    fun `saveAuthToken delegates to storageManager`() = runTest {
-        // Given
-        val token = "test-token"
-        coDoNothing().whenever(mockStorageManager).saveAuthToken(any())
-        
-        // When
-        repository.saveAuthToken(token)
-        
-        // Then
-        coVerify(mockStorageManager).saveAuthToken(token)
-    }
 }

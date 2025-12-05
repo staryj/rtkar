@@ -13,7 +13,6 @@ import android.webkit.WebStorage
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.ngerasimov.rtkar.data.StorageManager
 import com.ngerasimov.rtkar.data.api.RtkApiWrapper
