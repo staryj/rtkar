@@ -46,6 +46,16 @@
         <item name="itemIconTint">@color/nav_bar_icon_color_selector</item>
         <item name="itemTextColor">@color/nav_bar_text_color_selector</item>
         <item name="itemRippleColor">@color/nav_bar_item_text_selected</item>
+        <item name="itemTextAppearanceActive">@style/TextAppearance.RTKar.BottomNavigation.Active</item>
+        <item name="itemTextAppearanceInactive">@style/TextAppearance.RTKar.BottomNavigation.Inactive</item>
+    </style>
+    
+    <style name="TextAppearance.RTKar.BottomNavigation.Active" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="android:textSize">@dimen/text_size_medium</item>
+    </style>
+    
+    <style name="TextAppearance.RTKar.BottomNavigation.Inactive" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="android:textSize">@dimen/text_size_medium</item>
     </style>
 
     <style name="Theme.RTKar.NoActionBar">
@@ -53,7 +63,13 @@
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="Theme.RTKar.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="Theme.RTKar.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="titleTextAppearance">@style/TextAppearance.RTKar.Toolbar.Title</item>
+    </style>
+    
+    <style name="TextAppearance.RTKar.Toolbar.Title" parent="TextAppearance.AppCompat.Title">
+        <item name="android:textSize">@dimen/text_size_large</item>
+    </style>
 
     <style name="Theme.RTKar.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
     
@@ -63,5 +79,10 @@
         <item name="itemTextColor">@color/nav_drawer_text_color_selector</item>
         <item name="itemBackground">@drawable/nav_drawer_item_background_selector</item>
         <item name="android:background">@color/nav_drawer_background</item>
+        <item name="itemTextAppearance">@style/TextAppearance.RTKar.NavigationDrawer</item>
+    </style>
+    
+    <style name="TextAppearance.RTKar.NavigationDrawer" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:textSize">@dimen/text_size_medium</item>
     </style>
 </resources>

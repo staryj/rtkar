@@ -22,8 +22,8 @@
 
             <ImageView
                 android:id="@+id/device_icon"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="@dimen/icon_size_medium"
+                android:layout_height="@dimen/icon_size_medium"
                 android:contentDescription="@string/device_icon_content_description" />
 
             <TextView
@@ -35,15 +35,15 @@
                 android:maxLines="3"
                 android:ellipsize="end"
                 android:textAlignment="center"
-                android:textSize="16sp"
+                android:textSize="@dimen/text_size_medium"
                 android:textStyle="bold" />
 
         </LinearLayout>
 
         <ImageButton
             android:id="@+id/delete_button"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="@dimen/icon_size_small"
+            android:layout_height="@dimen/icon_size_small"
             android:layout_gravity="top|end"
             android:layout_margin="4dp"
             android:background="@drawable/delete_button_background"

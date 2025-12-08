@@ -1,3 +1,12 @@
 <resources>
     <dimen name="fragment_horizontal_margin">16dp</dimen>
+    
+    <!-- Text Sizes - Small screens (default) -->
+    <dimen name="text_size_large">28sp</dimen>
+    <dimen name="text_size_medium">16sp</dimen>
+    
+    <!-- Icon Sizes - Small screens (default) -->
+    <dimen name="icon_size_large">28dp</dimen>
+    <dimen name="icon_size_medium">48dp</dimen>
+    <dimen name="icon_size_small">24dp</dimen>
 </resources>

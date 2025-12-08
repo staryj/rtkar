@@ -1,0 +1,10 @@
+<resources>
+    <!-- Text Sizes - Extra large screens (w1240dp+) -->
+    <dimen name="text_size_large">40sp</dimen>
+    <dimen name="text_size_medium">24sp</dimen>
+    
+    <!-- Icon Sizes - Extra large screens (w1240dp+) -->
+    <dimen name="icon_size_large">40dp</dimen>
+    <dimen name="icon_size_medium">60dp</dimen>
+    <dimen name="icon_size_small">40dp</dimen>
+</resources>
