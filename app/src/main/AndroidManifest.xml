@@ -27,6 +27,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ui.shortcut.OpenBarrierActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:taskAffinity="com.ngerasimov.rtkar.barrier"
+            android:theme="@style/Theme.RTKar.OpenBarrier" />
     </application>
 
 </manifest>

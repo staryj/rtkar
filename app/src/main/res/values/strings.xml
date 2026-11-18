@@ -21,6 +21,13 @@
     <string name="settings_barriers_empty">Нет доступных шлагбаумов</string>
     <string name="settings_doors_empty">Нет доступных дверей</string>
     <string name="settings_reload_content_description">Обновить</string>
+    <string name="shortcut_pin_unsupported">Лаунчер не может закрепить значок на домашнем экране. Шлагбаум добавлен на экран управления.</string>
+    <string name="shortcut_barrier_disabled">Шлагбаум отключён в RTKar</string>
+    <string name="shortcut_barrier_fallback_label">Шлагбаум</string>
+    <string name="open_barrier_opening">Открываю %1$s…</string>
+    <string name="open_barrier_success">Открыто</string>
+    <string name="open_barrier_missing">Не удалось определить шлагбаум</string>
+    <string name="open_barrier_not_selected">Этот шлагбаум больше не выбран</string>
 
     <!-- Device Card -->
     <string name="device_delete_content_description">Удалить</string>

@@ -123,6 +123,13 @@ class SettingsFragment : Fragment() {
             }
         }
 
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.shortcutNotice.collect { notice ->
+                binding.shortcutNotice.text = notice
+                binding.shortcutNotice.visibility = if (notice.isNullOrBlank()) View.GONE else View.VISIBLE
+            }
+        }
+
         // Observe selected device IDs to update UI
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.selectedDeviceIds.collect {
