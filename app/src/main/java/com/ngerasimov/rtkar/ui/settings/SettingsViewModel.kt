@@ -9,6 +9,10 @@ import com.ngerasimov.rtkar.data.EntityType
 import com.ngerasimov.rtkar.data.api.ApiError
 import com.ngerasimov.rtkar.data.api.Device
 import com.ngerasimov.rtkar.data.repository.DeviceRepository
+import com.ngerasimov.rtkar.shortcut.AndroidBarrierShortcuts
+import com.ngerasimov.rtkar.shortcut.BarrierShortcutPlanner
+import com.ngerasimov.rtkar.shortcut.BarrierShortcutStore
+import com.ngerasimov.rtkar.shortcut.ShortcutCommand
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,7 +26,8 @@ import kotlinx.coroutines.launch
  */
 class SettingsViewModel(
     application: Application,
-    private val repository: DeviceRepository
+    private val repository: DeviceRepository,
+    private val shortcuts: BarrierShortcutStore = AndroidBarrierShortcuts(application)
 ) : AndroidViewModel(application) {
     
     companion object {
@@ -46,6 +51,9 @@ class SettingsViewModel(
     
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
+
+    private val _shortcutNotice = MutableStateFlow<String?>(null)
+    val shortcutNotice: StateFlow<String?> = _shortcutNotice.asStateFlow()
     
     private val _selectedDeviceIds = MutableStateFlow<Set<String>>(emptySet())
     val selectedDeviceIds: StateFlow<Set<String>> = _selectedDeviceIds.asStateFlow()
@@ -88,6 +96,7 @@ class SettingsViewModel(
                 Log.i(TAG, "Barriers received: ${devices.size}")
                 val filtered = filterDevices(devices, "barriers")
                 _barrierDevices.value = filtered
+                syncBarrierShortcutTitles(filtered)
                 Log.i(TAG, "Barriers available for display: ${filtered.size}")
             }.onFailure { exception ->
                 Log.e(TAG, "Failed to load barriers", exception)
@@ -156,11 +165,26 @@ class SettingsViewModel(
      */
     fun toggleDeviceSelection(device: Device, type: EntityType) {
         viewModelScope.launch {
+            val wasSelected = repository.getEntitiesSync().any { entity ->
+                entity.deviceId == device.id && entity.type == type
+            }
             repository.toggleDeviceSelection(
                 deviceId = device.id,
                 title = device.name_by_company,
                 type = type
             )
+            val commands = BarrierShortcutPlanner.onToggle(
+                type = type,
+                deviceId = device.id,
+                title = device.name_by_company,
+                selected = !wasSelected,
+                pinSupported = shortcuts.isPinSupported(),
+                alreadyPinned = shortcuts.isPinned(device.id)
+            )
+            shortcuts.execute(commands)
+            if (commands.any { it is ShortcutCommand.PinUnsupported }) {
+                _shortcutNotice.value = getApplication<Application>().getString(R.string.shortcut_pin_unsupported)
+            }
         }
     }
     
@@ -186,6 +210,7 @@ class SettingsViewModel(
                     barrierResult.onSuccess { devices ->
                         val filtered = filterDevices(devices, "barriers")
                         _barrierDevices.value = filtered
+                        syncBarrierShortcutTitles(filtered)
                     }.onFailure { exception ->
                         Log.e(TAG, "Failed to reload barriers", exception)
                         val errorMsg = when (exception) {
@@ -255,5 +280,18 @@ class SettingsViewModel(
                 }
             }
         }
+    }
+
+    private suspend fun syncBarrierShortcutTitles(devices: List<Device>) {
+        val entities = repository.getEntitiesSync()
+        val sync = BarrierShortcutPlanner.syncTitles(
+            entities = entities,
+            namesByDeviceId = devices.associate { it.id to it.name_by_company },
+            pinnedDeviceIds = shortcuts.pinnedDeviceIds()
+        )
+        if (sync.entities != entities) {
+            repository.saveEntities(sync.entities)
+        }
+        shortcuts.execute(sync.shortcutUpdates)
     }
 }

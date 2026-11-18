@@ -8,6 +8,9 @@ import com.ngerasimov.rtkar.R
 import com.ngerasimov.rtkar.data.Entity
 import com.ngerasimov.rtkar.data.api.ApiError
 import com.ngerasimov.rtkar.data.repository.DeviceRepository
+import com.ngerasimov.rtkar.shortcut.AndroidBarrierShortcuts
+import com.ngerasimov.rtkar.shortcut.BarrierShortcutPlanner
+import com.ngerasimov.rtkar.shortcut.BarrierShortcutStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,7 +23,8 @@ import kotlinx.coroutines.launch
  */
 class ControlViewModel(
     application: Application,
-    private val repository: DeviceRepository
+    private val repository: DeviceRepository,
+    private val shortcuts: BarrierShortcutStore = AndroidBarrierShortcuts(application)
 ) : AndroidViewModel(application) {
     
     companion object {
@@ -128,6 +132,16 @@ class ControlViewModel(
             if (index >= 0) {
                 currentEntities.removeAt(index)
                 repository.saveEntities(currentEntities)
+                shortcuts.execute(
+                    BarrierShortcutPlanner.onToggle(
+                        type = entity.type,
+                        deviceId = entity.deviceId,
+                        title = entity.title,
+                        selected = false,
+                        pinSupported = true,
+                        alreadyPinned = true
+                    )
+                )
             }
         }
     }

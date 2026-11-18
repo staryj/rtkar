@@ -16,9 +16,12 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.appcompat.app.AppCompatActivity
+import com.ngerasimov.rtkar.data.EntityType
 import com.ngerasimov.rtkar.data.StorageManager
 import com.ngerasimov.rtkar.data.api.RtkApiWrapper
 import com.ngerasimov.rtkar.data.repository.DeviceRepository
+import com.ngerasimov.rtkar.shortcut.AndroidBarrierShortcuts
+import com.ngerasimov.rtkar.shortcut.BarrierShortcutPlanner
 import com.ngerasimov.rtkar.databinding.ActivityMainBinding
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -28,6 +31,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     private lateinit var repository: DeviceRepository
+    private val barrierShortcuts by lazy { AndroidBarrierShortcuts(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,6 +71,7 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repository.authToken.collect { authToken ->
                 val isAuthorized = !authToken.isNullOrBlank()
+                syncBarrierShortcuts(isAuthorized)
                 
                 // Update navigation configuration
                 setupNavigation(isAuthorized)
@@ -259,6 +264,16 @@ class MainActivity : AppCompatActivity() {
             }
             .setNegativeButton(R.string.no, null)
             .show()
+    }
+
+    private suspend fun syncBarrierShortcuts(isAuthorized: Boolean) {
+        val commands = if (isAuthorized) {
+            val barriers = repository.getEntitiesSync().filter { it.type == EntityType.BARRIER }
+            BarrierShortcutPlanner.onAuthorized(barriers, barrierShortcuts.pinnedDeviceIds())
+        } else {
+            BarrierShortcutPlanner.onLoggedOut(barrierShortcuts.pinnedDeviceIds())
+        }
+        barrierShortcuts.execute(commands)
     }
 
     private fun performLogout() {
